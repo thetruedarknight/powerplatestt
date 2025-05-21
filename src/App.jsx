@@ -1,11 +1,13 @@
 
 import { useEffect, useState } from "react";
+import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [menuData, setMenuData] = useState([]);
   const [doubleMeatPrice, setDoubleMeatPrice] = useState(20);
   const [deliveryDays, setDeliveryDays] = useState(["Tuesday", "Friday"]);
@@ -217,7 +219,9 @@ function calculateNextDelivery() {
 
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
-
+    if (showLanding) {
+    return <LandingPage onStart={() => setShowLanding(false)} />;
+  }
   return (
     <div className="min-h-screen bg-yellow-50 text-gray-800">
       <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
