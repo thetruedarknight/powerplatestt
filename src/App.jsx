@@ -1,0 +1,282 @@
+
+import { useEffect, useState } from "react";
+import BreakfastItemsSection from "./components/BreakfastItemsSection";
+import ProteinSnacksSection from "./components/ProteinSnacksSection";
+import MainMealsSection from "./components/MainMealsSection";
+import SaladsSection from "./components/SaladsSection";
+
+function App() {
+  const [menuData, setMenuData] = useState([]);
+  const [doubleMeatPrice, setDoubleMeatPrice] = useState(20);
+  const [deliveryDays, setDeliveryDays] = useState(["Tuesday", "Friday"]);
+  const [cutoffDays, setCutoffDays] = useState(["Friday", "Wednesday"]);
+  const [expectedDelivery, setExpectedDelivery] = useState("");
+  const [orderNumber, setOrderNumber] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [breakfastQty, setBreakfastQty] = useState([]);
+  const [snackQty, setSnackQty] = useState([]);
+  const [mealQty, setMealQty] = useState([]);
+  const [saladQty, setSaladQty] =useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [fullOrder, setFullOrder] = useState([]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    instructions: "",
+  });
+
+
+
+  // deliveryDays = ["Tuesday","Friday"]
+// cutoffDays   = ["Friday","Tuesday"]
+
+// In App.jsx:
+
+// At the top of App.jsx:
+const WEEKDAYS = [
+  "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
+];
+
+/**  
+ * Returns the next occurrence of `weekdayName` on or after `from` (midnight).  
+ */
+function getNextWeekday(weekdayName, from = new Date()) {
+  const idx = WEEKDAYS.indexOf(weekdayName);
+  const d = new Date(from);
+  d.setHours(0,0,0,0);
+  const shift = (idx - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + shift);
+  return d;
+}
+
+/**  
+ * Returns the **last** occurrence of `weekdayName` on or before `from` (midnight).  
+ */
+function getPrevWeekday(weekdayName, from = new Date()) {
+  const idx = WEEKDAYS.indexOf(weekdayName);
+  const d = new Date(from);
+  d.setHours(0,0,0,0);
+  const back = (d.getDay() - idx + 7) % 7;
+  d.setDate(d.getDate() - back);
+  return d;
+}
+
+function calculateNextDelivery() {
+  const now = new Date();
+  console.log("▶️ Now:", now.toString());
+  const [dayA, dayB] = deliveryDays;  // e.g. ["Tuesday","Friday"]
+  const [dayC, dayD] = cutoffDays;    // e.g. ["Friday","Tuesday"]
+
+  // 1) Try Day A
+  const nextA   = getNextWeekday(dayA, now);
+  const cutoffC = getPrevWeekday(dayC, nextA);
+  cutoffC.setHours(23,59,59,999);
+  console.log(`  Next ${dayA}:`, nextA.toDateString(),
+              `  Cutoff ${dayC}:`, cutoffC.toString());
+  if (now <= cutoffC) {
+    console.log("→ scheduling on A:", nextA.toDateString());
+    return nextA;
+  }
+
+  // 2) Try Day B
+  const nextB   = getNextWeekday(dayB, now);
+  const cutoffD = getPrevWeekday(dayD, nextB);
+  cutoffD.setHours(23,59,59,999);
+  console.log(`  Next ${dayB}:`, nextB.toDateString(),
+              `  Cutoff ${dayD}:`, cutoffD.toString());
+  if (now <= cutoffD) {
+    console.log("→ scheduling on B:", nextB.toDateString());
+    return nextB;
+  }
+
+  // 3) Missed both → next A + 1 week
+  const fallback = new Date(nextA);
+  fallback.setDate(fallback.getDate() + 7);
+  console.log("→ missed both, fallback to:", fallback.toDateString());
+  return fallback;
+}
+
+
+
+  useEffect(() => {
+    fetch("/api/sheets")
+      .then(res => res.json())
+      .then(({ menu, config }) => {
+        const parsed = (menu || []).map(item => ({
+          ...item,
+          price: parseFloat(item.price),
+          allowDoubleMeat: String(item.allowDoubleMeat).toUpperCase() === "TRUE",
+          imageURL: item.imageURL,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fats: item.fats,
+          extraProtein: item.extraProtein,
+        }));
+        setMenuData(parsed);
+
+        setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => 0));
+        setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
+        setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
+        setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
+
+        if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
+        if (config.deliveryDays)   setDeliveryDays(config.deliveryDays.split(","));
+        if (config.cutoffDays)     setCutoffDays(config.cutoffDays.split(","));
+      })
+      .catch(console.error);
+  }, []);
+
+  const buildOrder = () => {
+    const byCat = cat => menuData.filter(i => i.category === cat);
+    const simple = (items, qtys) =>
+      items.map((it, i) => ({ ...it, quantity: qtys[i] })).filter(x => x.quantity > 0);
+    const dual = (items, qtys) =>
+      items.flatMap((it, i) => {
+        const { regular, double } = qtys[i];
+        const rows = [];
+        if (regular > 0) rows.push({ ...it, quantity: regular, doubleMeat: false });
+        if (it.allowDoubleMeat && double > 0) rows.push({ ...it, quantity: double, doubleMeat: true });
+        return rows;
+      });
+    return [
+      ...simple(byCat("Breakfast Items"), breakfastQty),
+      ...simple(byCat("Protein Snacks"), snackQty),
+      ...dual(byCat("Main Meals"), mealQty),
+      ...dual(byCat("Salads"), saladQty),
+    ];
+  };
+
+  const calculateTotal = () =>
+    fullOrder.reduce((sum, it) => sum + (it.price + (it.doubleMeat ? doubleMeatPrice : 0)) * it.quantity, 0);
+
+  const handleSubmit = () => {
+    const ord = buildOrder();
+    const totalItems = ord.reduce((acc, i) => acc + i.quantity, 0);
+    if (totalItems < 5) {
+      alert("Please select at least 5 items to place an order.");
+      return;
+    }
+    setFullOrder(ord);
+    setShowConfirmation(true);
+  };
+
+  const confirmOrder = async () => {
+    // ← Prevent double‐clicks
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+  
+    const { name, email, phone, address, instructions } = formData;
+    if (!name || !email || !phone || !address) {
+      alert("Please fill out all required customer info.");
+      setIsSubmitting(false);    // ← re‐enable on validation fail
+      return;
+    }
+
+    const timestamp = new Date().toLocaleString("en-US", {
+      timeZone: "America/Port_of_Spain",
+      hour: "2-digit", minute: "2-digit", hour12: true,
+      month: "2-digit", day: "2-digit", year: "numeric",
+    });
+
+    const itemList = fullOrder.map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`).join("; ");
+    const deliveryDate = calculateNextDelivery();
+    setExpectedDelivery(deliveryDate.toLocaleDateString("en-US", {
+      weekday: "long", month: "long", day: "numeric",
+    }));
+
+    try {
+      const sheetRes = await fetch("/api/sheets");
+      const { orders } = await sheetRes.json();
+      const last = (orders || []).reduce((mx, r) => {
+        const n = parseInt(r.ordernumber, 10);
+        return isNaN(n) ? mx : Math.max(mx, n);
+      }, 1099);
+      const nextNum = last + 1;
+      setOrderNumber(nextNum);
+
+      const payload = { ordernumber: nextNum, timestamp, name, email, phone, address, instructions, items: itemList, total: calculateTotal().toFixed(2) };
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      setShowSuccess(true);
+      setShowConfirmation(false);
+    } catch (err) {
+      console.error("Submit error:", err);
+      alert("There was an error submitting your order.");
+      setIsSubmitting(false);
+    }
+  };
+
+  const cancelConfirmation = () => setShowConfirmation(false);
+  const getByCategory = cat => menuData.filter(i => i.category === cat);
+
+  return (
+    <div className="min-h-screen bg-yellow-50 text-gray-800">
+      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
+      <main>
+        {showSuccess ? (
+          <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
+            <h2 className="text-4xl font-bold text-green-700 mb-4">✅ Order Confirmed!</h2>
+            <p className="text-lg mb-2">Thank you for placing your order with <strong>PowerPlates</strong>.</p>
+            <p className="text-lg text-gray-700 mb-2">Your order number is: <span className="font-semibold">#{orderNumber}</span></p>
+            <p className="text-lg font-semibold text-gray-800">Your tentative delivery date is: <span className="text-green-700">{expectedDelivery}</span></p>
+            <p className="text-lg font-semibold text-gray-800">We'll be in touch with you shortly.</p>
+            <button onClick={() => window.location.reload()} className="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded">Place Another Order</button>
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            {!showConfirmation ? (
+              <>
+                <BreakfastItemsSection items={getByCategory("Breakfast Items")} quantities={breakfastQty} setQuantities={setBreakfastQty} />
+                <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
+                <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
+                <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
+                <button onClick={handleSubmit} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10">Submit Full Order</button>
+              </>
+            ) : (
+              <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
+                <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
+                <ul className="space-y-3 mb-4">
+                  {fullOrder.map((item, idx) => {
+                    const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
+                    return <li key={idx} className="flex justify-between border-b pb-2"><span>{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span><span>${lineTotal.toFixed(2)}</span></li>;
+                  })}
+                </ul>
+                <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <input type="text" placeholder="Full Name" className="p-3 border rounded w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                  <input type="email" placeholder="Email Address" className="p-3 border rounded w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
+                  <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
+                  <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
+                </div>
+                <textarea placeholder="Special Instructions (optional)" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
+                <div className="flex justify-center gap-6 mt-10">
+                  <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
+                  <button
+  onClick={confirmOrder}
+  disabled={isSubmitting}
+  className={`${
+    isSubmitting ? "opacity-50 cursor-not-allowed " : ""
+  }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
+>
+  {isSubmitting ? "Submitting…" : "Confirm Order"}
+</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default App;
