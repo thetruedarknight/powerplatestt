@@ -1,4 +1,5 @@
 import React from "react";
+import { Instagram } from "lucide-react";
 
 export default function LandingPage({ onStart }) {
   return (
@@ -11,9 +12,9 @@ export default function LandingPage({ onStart }) {
       </p>
       <button
         onClick={onStart}
-        className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg text-xl"
+        className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-xl hover:underline"
       >
-        Start Your Order
+        Browse Our Meal Selection
       </button>
       <section className="mt-16 max-w-2xl text-left">
         <h2 className="text-3xl font-semibold mb-2">About Us</h2>
@@ -27,6 +28,18 @@ export default function LandingPage({ onStart }) {
           eat smarter, we’ve got you covered. Browse our menu and customize your
           perfect meal plan today!
         </p>
+      </section>
+      <section className="mt-8 max-w-2xl text-left">
+        <h2 className="text-2xl font-semibold mb-2">Follow us on Instagram</h2>
+        <a
+          href="https://instagram.com/PowerPlatesTT"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center text-pink-500 hover:text-pink-600"
+        >
+          <Instagram className="w-6 h-6 mr-2" />
+          @PowerPlatesTT
+        </a>
       </section>
     </div>
   );
