@@ -262,7 +262,7 @@ function calculateNextDelivery() {
                   <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
                   <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
                 </div>
-                <textarea placeholder="Special Instructions (optional)" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
+                <textarea placeholder="Special Instructions - Alllergies, Dietary Restrictions, Additional Requests. Leave blank if none" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button
