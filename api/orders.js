@@ -72,25 +72,21 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: "Sheet append failed" });
   }
 
-  // 3) Send notification email via Nodemailer + Gmail
+    // 3) Send notification email via Nodemailer + Gmail
   try {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    }
-  });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      }
+    });
 
-  // VERIFY the connection configuration
-  await transporter.verify();
-  console.log("✅ SMTP transporter verified OK");
-
-  const mailOptions = {
-    from: `"PowerPlates" <${process.env.EMAIL_USER}>`,
-    to: process.env.RECIPIENT_EMAIL,
-    subject: `🍱 PowerPlates Order Received (#${ordernumber})`,
-    text: `
+    const mailOptions = {
+      from: `"PowerPlates" <${process.env.EMAIL_USER}>`,
+      to: process.env.RECIPIENT_EMAIL,
+      subject: `🍱 PowerPlates Order Received (#${ordernumber})`,
+      text: `
 New order #${ordernumber} at ${timestamp}
 
 Customer:
@@ -106,12 +102,15 @@ Total: $${total}
 
 Special Instructions:
   ${instructions || "(none)"}
-    `.trim()
-  };
+      `.trim()
+    };
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log("✅ Email send info:", info);
-} catch (err) {
-  console.error("❌ Email send error:", err);
-}
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error("❌ Email send error:", err);
+    // We don’t want to block the response if email fails; log and carry on:
+  }
+
+  // 4) All done
+  return res.status(200).json({ success: true });
 }

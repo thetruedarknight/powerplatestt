@@ -258,12 +258,70 @@ function calculateNextDelivery() {
                 </ul>
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <input type="text" placeholder="Full Name" className="p-3 border rounded w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
-                  <input type="email" placeholder="Email Address" className="p-3 border rounded w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
-                  <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
-                  <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
-                </div>
-                <textarea placeholder="Special Instructions - Alllergies, Dietary Restrictions, Additional Requests. Leave blank if none" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
+  <input
+    type="text"
+    placeholder="Full Name"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.name}
+    onChange={e => setFormData({ ...formData, name: e.target.value })}
+    required
+  />
+
+  <input
+    type="email"
+    placeholder="Email Address"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.email}
+    onChange={e => setFormData({ ...formData, email: e.target.value })}
+    required
+  />
+
+  <input
+    type="tel"
+    placeholder="Phone Number"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.phone}
+    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+    required
+  />
+
+  <input
+    type="text"
+    placeholder="Delivery Address"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.address}
+    onChange={e => setFormData({ ...formData, address: e.target.value })}
+    required
+  />
+</div>
+
+<textarea
+  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+  rows={3}
+  className="w-full p-3 border rounded mb-6
+             border-gray-300 bg-white text-gray-900 placeholder-gray-500
+             focus:outline-none focus:ring-2 focus:ring-yellow-500
+             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+             dark:focus:ring-yellow-400"
+  value={formData.instructions}
+  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+/>
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button

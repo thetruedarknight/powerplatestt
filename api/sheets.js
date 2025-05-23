@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const sheets = google.sheets({ version: "v4", auth });
   
   // 2. Your sheet ID (from its URL: the long string between /d/ and /edit)
-  const spreadsheetId = "1EAcw_w9MGCcchIg3l85W0xGcf5ZdkEdlihscp0PSZxM";
+  const spreadsheetId = process.env.SPREADSHEET_ID;
 
   try {
     // 3a. Read the Menu tab
