@@ -16,8 +16,8 @@ export default function LandingPage({ onStart }) {
 
       <h1 className="text-5xl font-bold mb-2">Welcome to Power Plates</h1>
       <p className="text-2xl font-semibold mb-4">Healthy Meals, Delivered to Your Door</p>
-      <p className="max-w-xl text-center mb-8">
-        At Power Plates, we make clean eating simple, affordable, and delicious with our ready-to-enjoy meals. Tailormade to fit your lifestyle and fuel your week
+      <p className="max-w-xl text-left mb-8">
+        At Power Plates, we make clean eating simple, affordable, and delicious with our ready-to-enjoy meals - tailormade to fit your lifestyle and fuel your week
       </p>
 
       <section className="max-w-2xl text-left mb-8">
@@ -31,7 +31,7 @@ export default function LandingPage({ onStart }) {
           Choose from our rotating weekly menu. We deliver chilled, ready-to-eat meals twice weekly to most locations within Trinidad. Once you've placed your order, one of our firendly team members will get in touch with you to confirm delivery details.
         </p>
         <p className="mb-4">
-          Whether you're planning ahead for the week or just need a break from the kitchen, PowerPlates has you covered.
+          Whether you're planning ahead for the week or just need a break from the kitchen, Power Plates has you covered.
         </p>
         <h2 className="text-3xl font-semibold mb-2">👨‍👩‍👧 Join the Power Plates Fam!</h2>
         <p className="mb-0 font-semibold">Real meals. Real results.</p>

@@ -1,6 +1,6 @@
 // api/orders.js
 import { google } from "googleapis";
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,18 +8,17 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  // 1) Read & parse the body
+  // 1) Parse the JSON body
   let payload;
   try {
-    const chunks = [];
-    for await (const chunk of req) chunks.push(chunk);
-    const raw = Buffer.concat(chunks).toString("utf8");
-    payload = JSON.parse(raw);
+    const buf = [];
+    for await (const chunk of req) buf.push(chunk);
+    payload = JSON.parse(Buffer.concat(buf).toString("utf8"));
   } catch (err) {
     console.error("❌ Body parse error:", err);
     return res.status(400).json({ success: false, error: "Invalid JSON" });
   }
-  
+
   const {
     ordernumber,
     timestamp,
@@ -32,12 +31,12 @@ export default async function handler(req, res) {
     total,
   } = payload;
 
-  // 2) Authenticate with Google
+  // 2) Append to Google Sheets
   let auth;
   try {
     auth = new google.auth.JWT({
       email: process.env.GOOGLE_CLIENT_EMAIL,
-      key:   process.env.GOOGLE_PRIVATE_KEY,  // raw PEM with real newlines
+      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
   } catch (err) {
@@ -46,9 +45,8 @@ export default async function handler(req, res) {
   }
 
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1EAcw_w9MGCcchIg3l85W0xGcf5ZdkEdlihscp0PSZxM";  // ← replace this!
+  const spreadsheetId = process.env.SPREADSHEET_ID;
 
-  // 3) Append the row
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId,
@@ -69,12 +67,12 @@ export default async function handler(req, res) {
         ]]
       }
     });
-    return res.status(200).json({ success: true });
   } catch (err) {
     console.error("❌ Sheets append error:", err);
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: "Sheet append failed" });
   }
 
+  // 3) Send notification email via Nodemailer + Gmail
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -116,4 +114,3 @@ Special Instructions:
   // 4) All done
   return res.status(200).json({ success: true });
 }
-
