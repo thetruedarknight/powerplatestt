@@ -2,7 +2,7 @@ import React from "react";
 import { Instagram } from "lucide-react";
 
 // Use the same Imgur banner URL as in App.jsx
-const bannerUrl = "https://i.imgur.com/rpnAoAp.png";
+const bannerUrl = "https://i.imgur.com/alZ1n3Z.png";
 
 export default function LandingPage({ onStart }) {
   return (

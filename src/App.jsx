@@ -225,7 +225,7 @@ function calculateNextDelivery() {
   return (
     
     <div className="min-h-screen bg-yellow-50 text-gray-800">
-      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
+      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
       <main>
         {showSuccess ? (
           <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
