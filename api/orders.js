@@ -2,13 +2,15 @@
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
 
+const ORDER_OFFSET = 1098; // so that row 2 → order 1100
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  // 1) Parse the JSON body
+  // 1) Parse JSON body
   let payload;
   try {
     const buf = [];
@@ -20,7 +22,6 @@ export default async function handler(req, res) {
   }
 
   const {
-    ordernumber,
     timestamp,
     name,
     email,
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
     total,
   } = payload;
 
-  // 2) Append to Google Sheets
+  // 2) Authenticate with Google
   let auth;
   try {
     auth = new google.auth.JWT({
@@ -47,15 +48,17 @@ export default async function handler(req, res) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = process.env.SPREADSHEET_ID;
 
+  let rowIndex;
   try {
-    await sheets.spreadsheets.values.append({
+    // 3) Append row with blank OrderNumber in col A
+    const appendRes = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Orders!A:I",
+      range: "Orders!A2:I",
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [[
-          ordernumber,
+          "",          // OrderNumber to fill in later
           timestamp,
           name,
           email,
@@ -67,12 +70,34 @@ export default async function handler(req, res) {
         ]]
       }
     });
+
+    // 4) Extract the row index from updatedRange (e.g. "Orders!A5:I5" → rowIndex = 5)
+    const updatedRange = appendRes.data.updates.updatedRange; 
+    // split "Orders!A5:I5" → ["Orders","A5:I5"], take "A5", strip non-digits → "5"
+    rowIndex = parseInt(
+      updatedRange.split("!")[1].split(":")[0].replace(/\D/g, ""),
+      10
+    );
   } catch (err) {
     console.error("❌ Sheets append error:", err);
     return res.status(500).json({ success: false, error: "Sheet append failed" });
   }
 
-    // 3) Send notification email via Nodemailer + Gmail
+  // 5) Compute and write back the OrderNumber
+  const newOrderNumber = rowIndex + ORDER_OFFSET;
+  try {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Orders!A${rowIndex}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [[newOrderNumber]] }
+    });
+  } catch (err) {
+    console.error("❌ Writing order number error:", err);
+    // not fatal to the user—proceed to email but log for debugging
+  }
+
+  // 6) Send notification email via Gmail
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -82,12 +107,15 @@ export default async function handler(req, res) {
       }
     });
 
+    await transporter.verify();
+    console.log("✅ SMTP verified");
+
     const mailOptions = {
       from: `"PowerPlates" <${process.env.EMAIL_USER}>`,
       to: process.env.RECIPIENT_EMAIL,
-      subject: `🍱 PowerPlates Order Received (#${ordernumber})`,
+      subject: `🍱 PowerPlates Order Received (#${newOrderNumber})`,
       text: `
-New order #${ordernumber} at ${timestamp}
+New order #${newOrderNumber} at ${timestamp}
 
 Customer:
   Name:        ${name}
@@ -105,12 +133,13 @@ Special Instructions:
       `.trim()
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent:", info.messageId);
   } catch (err) {
     console.error("❌ Email send error:", err);
-    // We don’t want to block the response if email fails; log and carry on:
+    // proceed regardless
   }
 
-  // 4) All done
-  return res.status(200).json({ success: true });
+  // 7) Done
+  return res.status(200).json({ success: true, ordernumber: newOrderNumber });
 }
