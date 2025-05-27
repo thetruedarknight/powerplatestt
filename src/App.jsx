@@ -167,15 +167,15 @@ function calculateNextDelivery() {
     setShowConfirmation(true);
   };
 
-  const confirmOrder = async () => {
-    // ← Prevent double‐clicks
+    const confirmOrder = async () => {
+    // prevent double-click bombs
     if (isSubmitting) return;
     setIsSubmitting(true);
-  
+
     const { name, email, phone, address, instructions } = formData;
     if (!name || !email || !phone || !address) {
       alert("Please fill out all required customer info.");
-      setIsSubmitting(false);    // ← re‐enable on validation fail
+      setIsSubmitting(false);
       return;
     }
 
@@ -184,38 +184,54 @@ function calculateNextDelivery() {
       hour: "2-digit", minute: "2-digit", hour12: true,
       month: "2-digit", day: "2-digit", year: "numeric",
     });
+    const itemList = fullOrder
+      .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
+      .join("; ");
 
-    const itemList = fullOrder.map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`).join("; ");
-    const deliveryDate = calculateNextDelivery();
-    setExpectedDelivery(deliveryDate.toLocaleDateString("en-US", {
-      weekday: "long", month: "long", day: "numeric",
-    }));
+    // build your payload
+    const payload = {
+      timestamp,
+      name, email, phone, address, instructions,
+      items: itemList,
+      total: calculateTotal().toFixed(2),
+    };
 
     try {
-      const sheetRes = await fetch("/api/sheets");
-      const { orders } = await sheetRes.json();
-      const last = (orders || []).reduce((mx, r) => {
-        const n = parseInt(r.ordernumber, 10);
-        return isNaN(n) ? mx : Math.max(mx, n);
-      }, 1099);
-      const nextNum = last + 1;
-      setOrderNumber(nextNum);
-
-      const payload = { ordernumber: nextNum, timestamp, name, email, phone, address, instructions, items: itemList, total: calculateTotal().toFixed(2) };
-      await fetch("/api/orders", {
+     // Old: you were doing a fetch("/api/sheets") → computing nextNum yourself…
+     // Now just POST to /api/orders and read back the real ordernumber:
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      setShowSuccess(true);
+      if (!res.ok) {
+        throw new Error("Order submission failed");
+      }
+
+    // pull the server-computed ordernumber from the response
+      const { success, ordernumber } = await res.json();
+      if (!success) {
+        throw new Error("Server rejected the order");
+      }
+
+     // set it in state so the success screen shows the correct ID
+      setOrderNumber(ordernumber);
+     setExpectedDelivery(
+       calculateNextDelivery().toLocaleDateString("en-US", {
+         weekday: "long", month: "long", day: "numeric",
+       })
+     );
+
       setShowConfirmation(false);
+      setShowSuccess(true);
     } catch (err) {
       console.error("Submit error:", err);
       alert("There was an error submitting your order.");
       setIsSubmitting(false);
     }
   };
+
 
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
