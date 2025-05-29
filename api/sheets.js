@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     // 3a. Read the Menu tab
     const menuResp = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Menu!A2:J"  // adjust columns if your Menu sheet has more/fewer
+      range: "Menu!A2:K"  // adjust columns if your Menu sheet has more/fewer
     });
     const menuRows = menuResp.data.values || [];
     const menu = menuRows.map(r => ({
@@ -31,7 +31,8 @@ export default async function handler(req, res) {
       protein:        r[6] ?? "",
       carbs:          r[7] ?? "",
       fats:           r[8] ?? "",
-      extraProtein:   r[9] ?? ""
+      extraProtein:   r[9] ?? "",
+      display: String(r[10] ?? "").toUpperCase() === "TRUE"
     }));
 
     // 3b. Read the Config tab

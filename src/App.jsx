@@ -108,7 +108,10 @@ function calculateNextDelivery() {
     fetch("/api/sheets")
       .then(res => res.json())
       .then(({ menu, config }) => {
-        const parsed = (menu || []).map(item => ({
+        const parsed = (menu || [])
+         // only keep rows with display = TRUE
+         .filter(item => String(item.display).toUpperCase() === "TRUE")
+         .map(item => ({
           ...item,
           price: parseFloat(item.price),
           allowDoubleMeat: String(item.allowDoubleMeat).toUpperCase() === "TRUE",
