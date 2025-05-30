@@ -211,7 +211,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50 text-gray-800">
+     <div className="min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-800">
       <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
       <main>
         {showSuccess ? (
@@ -248,7 +248,7 @@ function App() {
                     );
                   })}
                 </ul>
-                <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
+                <div className="w-full text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <input
                     type="text"
