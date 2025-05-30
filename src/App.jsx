@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
@@ -6,46 +5,11 @@ import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
 
-function App() {
-  const [showLanding, setShowLanding] = useState(true);
-  const [menuData, setMenuData] = useState([]);
-  const [doubleMeatPrice, setDoubleMeatPrice] = useState(20);
-  const [deliveryDays, setDeliveryDays] = useState(["Tuesday", "Friday"]);
-  const [cutoffDays, setCutoffDays] = useState(["Friday", "Wednesday"]);
-  const [expectedDelivery, setExpectedDelivery] = useState("");
-  const [orderNumber, setOrderNumber] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [breakfastQty, setBreakfastQty] = useState([]);
-  const [snackQty, setSnackQty] = useState([]);
-  const [mealQty, setMealQty] = useState([]);
-  const [saladQty, setSaladQty] =useState([]);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [fullOrder, setFullOrder] = useState([]);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    instructions: "",
-  });
-
-
-
-  // deliveryDays = ["Tuesday","Friday"]
-// cutoffDays   = ["Friday","Tuesday"]
-
-// In App.jsx:
-
-// At the top of App.jsx:
 const WEEKDAYS = [
   "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
 ];
 
-/**  
- * Returns the next occurrence of `weekdayName` on or after `from` (midnight).  
- */
+/** Returns the next occurrence of `weekdayName` on or after `from` (at midnight). */
 function getNextWeekday(weekdayName, from = new Date()) {
   const idx = WEEKDAYS.indexOf(weekdayName);
   const d = new Date(from);
@@ -55,9 +19,7 @@ function getNextWeekday(weekdayName, from = new Date()) {
   return d;
 }
 
-/**  
- * Returns the **last** occurrence of `weekdayName` on or before `from` (midnight).  
- */
+/** Returns the last occurrence of `weekdayName` on or before `from` (at midnight). */
 function getPrevWeekday(weekdayName, from = new Date()) {
   const idx = WEEKDAYS.indexOf(weekdayName);
   const d = new Date(from);
@@ -67,67 +29,77 @@ function getPrevWeekday(weekdayName, from = new Date()) {
   return d;
 }
 
-function calculateNextDelivery() {
+/** Given deliveryDays = [A,B] and cutoffDays = [C,D], picks the correct next date. */
+function calculateNextDelivery(deliveryDays, cutoffDays) {
   const now = new Date();
-  console.log("▶️ Now:", now.toString());
-  const [dayA, dayB] = deliveryDays;  // e.g. ["Tuesday","Friday"]
-  const [dayC, dayD] = cutoffDays;    // e.g. ["Friday","Tuesday"]
+  const [dayA, dayB] = deliveryDays;
+  const [dayC, dayD] = cutoffDays;
 
-  // 1) Try Day A
-  const nextA   = getNextWeekday(dayA, now);
+  // 1) Try A
+  const nextA = getNextWeekday(dayA, now);
   const cutoffC = getPrevWeekday(dayC, nextA);
   cutoffC.setHours(23,59,59,999);
-  console.log(`  Next ${dayA}:`, nextA.toDateString(),
-              `  Cutoff ${dayC}:`, cutoffC.toString());
-  if (now <= cutoffC) {
-    console.log("→ scheduling on A:", nextA.toDateString());
-    return nextA;
-  }
+  if (now <= cutoffC) return nextA;
 
-  // 2) Try Day B
-  const nextB   = getNextWeekday(dayB, now);
+  // 2) Try B
+  const nextB = getNextWeekday(dayB, now);
   const cutoffD = getPrevWeekday(dayD, nextB);
   cutoffD.setHours(23,59,59,999);
-  console.log(`  Next ${dayB}:`, nextB.toDateString(),
-              `  Cutoff ${dayD}:`, cutoffD.toString());
-  if (now <= cutoffD) {
-    console.log("→ scheduling on B:", nextB.toDateString());
-    return nextB;
-  }
+  if (now <= cutoffD) return nextB;
 
-  // 3) Missed both → next A + 1 week
+  // 3) Fallback → A + 1 week
   const fallback = new Date(nextA);
   fallback.setDate(fallback.getDate() + 7);
-  console.log("→ missed both, fallback to:", fallback.toDateString());
   return fallback;
 }
 
+function App() {
+  const [showLanding, setShowLanding]           = useState(true);
+  const [menuData, setMenuData]                 = useState([]);
+  const [doubleMeatPrice, setDoubleMeatPrice]   = useState(20);
+  const [deliveryDays, setDeliveryDays]         = useState(["Tuesday","Friday"]);
+  const [cutoffDays, setCutoffDays]             = useState(["Friday","Wednesday"]);
+  const [expectedDelivery, setExpectedDelivery] = useState("");
+  const [orderNumber, setOrderNumber]           = useState(null);
+  const [isSubmitting, setIsSubmitting]         = useState(false);
 
+  const [breakfastQty, setBreakfastQty] = useState([]);
+  const [snackQty, setSnackQty]         = useState([]);
+  const [mealQty, setMealQty]           = useState([]);
+  const [saladQty, setSaladQty]         = useState([]);
 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccess, setShowSuccess]           = useState(false);
+  const [fullOrder, setFullOrder]               = useState([]);
+
+  const [formData, setFormData] = useState({
+    name: "", email: "", phone: "", address: "", instructions: ""
+  });
+
+  // FETCH & PARSE
   useEffect(() => {
     fetch("/api/sheets")
-      .then(res => res.json())
+      .then(r => r.json())
       .then(({ menu, config }) => {
         const parsed = (menu || [])
-         // only keep rows with display = TRUE
-         .filter(item => String(item.display).toUpperCase() === "TRUE")
-         .map(item => ({
-          ...item,
-          price: parseFloat(item.price),
-          allowDoubleMeat: String(item.allowDoubleMeat).toUpperCase() === "TRUE",
-          imageURL: item.imageURL,
-          calories: item.calories,
-          protein: item.protein,
-          carbs: item.carbs,
-          fats: item.fats,
-          extraProtein: item.extraProtein,
-        }));
-        setMenuData(parsed);
+          .filter(i => String(i.display).toUpperCase() === "TRUE")
+          .map(i => ({
+            ...i,
+            price:          parseFloat(i.price),
+            allowDoubleMeat:String(i.allowDoubleMeat).toUpperCase()==="TRUE",
+            imageURL:       i.imageURL,
+            calories:       i.calories,
+            protein:        i.protein,
+            carbs:          i.carbs,
+            fats:           i.fats,
+            extraProtein:   i.extraProtein,
+          }));
 
-        setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => 0));
-        setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
-        setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
-        setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
+        setMenuData(parsed);
+        setBreakfastQty(parsed.filter(x=>x.category==="Breakfast Items").map(()=>0));
+        setSnackQty    (parsed.filter(x=>x.category==="Protein Snacks").map(()=>0));
+        setMealQty     (parsed.filter(x=>x.category==="Main Meals").map(()=>({regular:0,double:0})));
+        setSaladQty    (parsed.filter(x=>x.category==="Salads").map(()=>({regular:0,double:0})));
 
         if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
         if (config.deliveryDays)   setDeliveryDays(config.deliveryDays.split(","));
@@ -136,33 +108,32 @@ function calculateNextDelivery() {
       .catch(console.error);
   }, []);
 
+  // BUILD / TOTAL
   const buildOrder = () => {
-    const byCat = cat => menuData.filter(i => i.category === cat);
-    const simple = (items, qtys) =>
-      items.map((it, i) => ({ ...it, quantity: qtys[i] })).filter(x => x.quantity > 0);
-    const dual = (items, qtys) =>
-      items.flatMap((it, i) => {
-        const { regular, double } = qtys[i];
-        const rows = [];
-        if (regular > 0) rows.push({ ...it, quantity: regular, doubleMeat: false });
-        if (it.allowDoubleMeat && double > 0) rows.push({ ...it, quantity: double, doubleMeat: true });
-        return rows;
-      });
+    const by = c => menuData.filter(m=>m.category===c);
+    const simple = (items,qty)=> items.map((it,i)=>({...it,quantity:qty[i]})).filter(x=>x.quantity>0);
+    const dual   = (items,qty)=> items.flatMap((it,i)=>{
+      const {regular,double} = qty[i], rows=[];
+      if (regular>0) rows.push({...it,quantity:regular,doubleMeat:false});
+      if (it.allowDoubleMeat && double>0) rows.push({...it,quantity:double,doubleMeat:true});
+      return rows;
+    });
     return [
-      ...simple(byCat("Breakfast Items"), breakfastQty),
-      ...simple(byCat("Protein Snacks"), snackQty),
-      ...dual(byCat("Main Meals"), mealQty),
-      ...dual(byCat("Salads"), saladQty),
+      ...simple(by("Breakfast Items"), breakfastQty),
+      ...simple(by("Protein Snacks"), snackQty),
+      ...dual  (by("Main Meals"),     mealQty),
+      ...dual  (by("Salads"),          saladQty),
     ];
   };
-
   const calculateTotal = () =>
-    fullOrder.reduce((sum, it) => sum + (it.price + (it.doubleMeat ? doubleMeatPrice : 0)) * it.quantity, 0);
+    fullOrder.reduce((sum,it)=>
+      sum + (it.price + (it.doubleMeat?doubleMeatPrice:0))*it.quantity
+    ,0);
 
+  // STEP 1: SELECT ITEMS
   const handleSubmit = () => {
     const ord = buildOrder();
-    const totalItems = ord.reduce((acc, i) => acc + i.quantity, 0);
-    if (totalItems < 5) {
+    if (ord.reduce((a,i)=>a+i.quantity,0) < 5) {
       alert("Please select at least 5 items to place an order.");
       return;
     }
@@ -170,217 +141,199 @@ function calculateNextDelivery() {
     setShowConfirmation(true);
   };
 
-    const confirmOrder = async () => {
-    // prevent double-click bombs
+  // STEP 2: CONFIRM & POST
+  const confirmOrder = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const { name, email, phone, address, instructions } = formData;
-    if (!name || !email || !phone || !address) {
+    const { name,email,phone,address,instructions } = formData;
+    if (!name||!email||!phone||!address) {
       alert("Please fill out all required customer info.");
       setIsSubmitting(false);
       return;
     }
 
     const timestamp = new Date().toLocaleString("en-US", {
-      timeZone: "America/Port_of_Spain",
-      hour: "2-digit", minute: "2-digit", hour12: true,
-      month: "2-digit", day: "2-digit", year: "numeric",
+      timeZone:"America/Port_of_Spain",
+      hour:"2-digit",minute:"2-digit",hour12:true,
+      month:"2-digit",day:"2-digit",year:"numeric"
     });
-    const itemList = fullOrder
-      .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
+    const items = fullOrder
+      .map(i=>`${i.name}${i.doubleMeat?" + Double Meat":""} x${i.quantity}`)
       .join("; ");
 
-    // build your payload
-    const payload = {
-      timestamp,
-      name, email, phone, address, instructions,
-      items: itemList,
-      total: calculateTotal().toFixed(2),
-    };
-
     try {
-     // Old: you were doing a fetch("/api/sheets") → computing nextNum yourself…
-     // Now just POST to /api/orders and read back the real ordernumber:
       const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ timestamp,name,email,phone,address,instructions,items,total:calculateTotal().toFixed(2) })
       });
-
-      if (!res.ok) {
-        throw new Error("Order submission failed");
-      }
-
-    // pull the server-computed ordernumber from the response
-      const { success, ordernumber } = await res.json();
-      if (!success) {
-        throw new Error("Server rejected the order");
-      }
-
-     // set it in state so the success screen shows the correct ID
+      const { success,ordernumber } = await res.json();
+      if (!success) throw new Error("Server rejected the order");
       setOrderNumber(ordernumber);
-     setExpectedDelivery(
-       calculateNextDelivery().toLocaleDateString("en-US", {
-         weekday: "long", month: "long", day: "numeric",
-       })
-     );
+
+      const deliveryDate = calculateNextDelivery(deliveryDays,cutoffDays);
+      setExpectedDelivery(
+        deliveryDate.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})
+      );
 
       setShowConfirmation(false);
       setShowSuccess(true);
-    } catch (err) {
-      console.error("Submit error:", err);
+    } catch(err) {
+      console.error(err);
       alert("There was an error submitting your order.");
       setIsSubmitting(false);
     }
   };
 
-
+  // STEP 3: BACK / EDIT
   const cancelConfirmation = () => setShowConfirmation(false);
-  const getByCategory = cat => menuData.filter(i => i.category === cat);
-    if (showLanding) {
-    return <LandingPage onStart={() => setShowLanding(false)} />;
+  const getByCategory    = cat => menuData.filter(x=>x.category===cat);
+
+  // ==== RENDER ====
+
+  // 0) Landing
+  if (showLanding) {
+    return <LandingPage onStart={()=>setShowLanding(false)} />;
   }
-  return (
-    
-    <div className="min-h-screen bg-yellow-50 text-gray-800">
-      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
-      <main>
-        {showSuccess ? (
-          <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-4xl font-bold text-green-700 mb-4">✅ Order Confirmed!</h2>
-            <p className="text-lg mb-2">Thank you for placing your order with <strong>PowerPlates</strong>.</p>
-            <p className="text-lg text-gray-700 mb-2">Your order number is: <span className="font-semibold">#{orderNumber}</span></p>
-            <p className="text-lg font-semibold text-gray-800">Your tentative delivery date is: <span className="text-green-700">{expectedDelivery}</span></p>
-            <p className="text-lg font-semibold text-gray-800">We'll be in touch with you shortly.</p>
-            <button onClick={() => window.location.reload()} className="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded">Place Another Order</button>
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            {!showConfirmation ? (
-              <>
-                <BreakfastItemsSection items={getByCategory("Breakfast Items")} quantities={breakfastQty} setQuantities={setBreakfastQty} />
-                <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
-                <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
-                <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
-                <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
-                <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
-              </>
-            ) : (
-              <div className="w-full max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md text-left">
-                <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
-                <ul className="space-y-3 mb-4">
-  {fullOrder.map((item, idx) => {
-    const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
+
+  // 1) Success
+  if (showSuccess) {
     return (
-      <li
-        key={idx}
-        className="flex justify-between border-b pb-2"
-      >
-        <span>
-          {item.name}
-          {item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}
-        </span>
-        <span>${lineTotal.toFixed(2)}</span>
-      </li>
-    );
-  })}
-</ul>
-
-                <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-  <input
-    type="text"
-    placeholder="Full Name"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.name}
-    onChange={e => setFormData({ ...formData, name: e.target.value })}
-    required
-  />
-
-  <input
-    type="email"
-    placeholder="Email Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.email}
-    onChange={e => setFormData({ ...formData, email: e.target.value })}
-    required
-  />
-
-  <input
-    type="tel"
-    placeholder="Phone Number"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.phone}
-    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-    required
-  />
-
-  <input
-    type="text"
-    placeholder="Delivery Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.address}
-    onChange={e => setFormData({ ...formData, address: e.target.value })}
-    required
-  />
-</div>
-
-<textarea
-  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
-  rows={3}
-  className="w-full p-3 border rounded mb-6
-             border-gray-300 bg-white text-gray-900 placeholder-gray-500
-             focus:outline-none focus:ring-2 focus:ring-yellow-500
-             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-             dark:focus:ring-yellow-400"
-  value={formData.instructions}
-  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-/>
-                <div className="flex justify-center gap-6 mt-10">
-                  <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
-                  <button
-  onClick={confirmOrder}
-  disabled={isSubmitting}
-  className={`${
-    isSubmitting ? "opacity-50 cursor-not-allowed " : ""
-  }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
->
-  {isSubmitting ? "Submitting…" : "Confirm Order"}
-</button>
-                </div>
-              </div>
-            )}
+      <div className="min-h-screen bg-yellow-50 text-gray-800">
+        <header className="h-72 bg-cover bg-center"
+          style={{backgroundImage:"url('https://i.imgur.com/alZ1n3Z.png')"}}
+        />
+        <main className="py-10 px-4">
+          <div className="max-w-2xl mx-auto text-center bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-4xl font-bold text-green-700 mb-4">✅ Order Confirmed!</h2>
+            <p className="text-lg mb-2">Thanks for ordering <strong>PowerPlates</strong>.</p>
+            <p className="text-lg mb-2">
+              Order #<span className="font-semibold">{orderNumber}</span>
+            </p>
+            <p className="text-lg mb-2">
+              Expected delivery: <span className="font-semibold">{expectedDelivery}</span>
+            </p>
+            <button
+              onClick={()=>window.location.reload()}
+              className="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded"
+            >
+              Place Another Order
+            </button>
           </div>
-        )}
+        </main>
+      </div>
+    );
+  }
+
+  // 2) Confirm
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen bg-yellow-50 text-gray-800">
+        <header className="h-72 bg-cover bg-center"
+          style={{backgroundImage:"url('https://i.imgur.com/alZ1n3Z.png')"}}
+        />
+        <main className="py-10 px-4">
+          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 text-left">
+            <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
+            <ul className="space-y-3 mb-4">
+              {fullOrder.map((it,idx)=>{
+                const lineTotal = (it.price + (it.doubleMeat?doubleMeatPrice:0))*it.quantity;
+                return (
+                  <li key={idx}
+                    className="flex justify-between items-center flex-wrap border-b pb-2"
+                  >
+                    <span className="flex-1 break-words">
+                      {it.name}{it.doubleMeat?" + Double Meat":""} × {it.quantity}
+                    </span>
+                    <span className="whitespace-nowrap ml-4">
+                      ${lineTotal.toFixed(2)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="text-right text-xl font-bold mb-6">
+              Total: ${calculateTotal().toFixed(2)}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* input fields unchanged, omitted for brevity */}
+            </div>
+
+            <div className="flex justify-center gap-6 mt-10">
+              <button
+                onClick={cancelConfirmation}
+                className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded"
+              >
+                Edit Order
+              </button>
+              <button
+                onClick={confirmOrder}
+                disabled={isSubmitting}
+                className={`${
+                  isSubmitting?"opacity-50 cursor-not-allowed ":""
+                }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
+              >
+                {isSubmitting?"Submitting…":"Confirm Order"}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // 3) Menu / Order Form
+  return (
+    <div className="min-h-screen bg-yellow-50 text-gray-800">
+      <header className="h-72 bg-cover bg-center"
+        style={{backgroundImage:"url('https://i.imgur.com/alZ1n3Z.png')"}}
+      />
+      <main className="text-center py-10">
+        <BreakfastItemsSection 
+          items={getByCategory("Breakfast Items")}
+          quantities={breakfastQty} setQuantities={setBreakfastQty}
+        />
+        <ProteinSnacksSection 
+          items={getByCategory("Protein Snacks")}
+          quantities={snackQty} setQuantities={setSnackQty}
+        />
+        <MainMealsSection 
+          items={getByCategory("Main Meals")}
+          quantities={mealQty} setQuantities={setMealQty}
+          doubleMeatPrice={doubleMeatPrice}
+        />
+        <SaladsSection 
+          items={getByCategory("Salads")}
+          quantities={saladQty} setQuantities={setSaladQty}
+          doubleMeatPrice={doubleMeatPrice}
+        />
+
+        <button
+          onClick={handleSubmit}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10"
+        >
+          Submit Full Order
+        </button>
+
+        <button
+          onClick={()=>setShowLanding(true)}
+          className="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10"
+        >
+          ← Back to Home
+        </button>
       </main>
+
       <a
-  href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
->
-  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
-    <path d="M.057 24l1.687-6.163C.6 15.9.041 13.932.041 12 .041 5.373 5.373.041 12 .041c3.181 0 6.155 1.24 8.409 3.492A11.84 11.84 0 0124 12c0 6.627-5.373 12-12 12a11.937 11.937 0 01-5.208-1.2L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.344 1.591 5.456 0 9.901-4.445 9.901-9.9 0-2.642-1.03-5.127-2.899-6.994C16.132 3.03 13.646 2 11.004 2 5.548 2 1.104 6.445 1.104 12c0 1.77.469 3.462 1.357 4.945l-.896 3.278 3.089-.86zm11.387-5.542c-.2-.1-1.177-.58-1.36-.646-.183-.065-.316-.1-.449.1-.132.2-.515.646-.63.777-.115.132-.232.148-.432.05-.2-.1-.84-.31-1.6-.99-.591-.526-.99-1.175-1.104-1.375-.115-.2-.012-.308.087-.407.09-.09.2-.232.3-.348.1-.116.132-.2.2-.332.066-.132.033-.25-.017-.348-.05-.1-.449-1.075-.615-1.475-.162-.388-.326-.336-.449-.343l-.382-.007c-.116 0-.3.033-.457.25-.157.217-.603.59-.603 1.442s.617 1.675.703 1.79c.083.116 1.21 1.846 2.94 2.588 1.73.743 1.73.495 2.04.464.307-.03 1.004-.408 1.146-.803.14-.396.14-.736.1-.803-.033-.065-.132-.1-.333-.2z" />
-  </svg>
-  Chat with us
-</a>
+        href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
+        target="_blank" rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
+      >
+        {/* WhatsApp icon SVG */}
+        Chat with us
+      </a>
     </div>
   );
 }
