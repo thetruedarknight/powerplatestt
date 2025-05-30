@@ -264,7 +264,7 @@ function calculateNextDelivery() {
                 <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
               </>
             ) : (
-              <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
+              <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
                 <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
                 <ul className="space-y-3 mb-4">
                   {fullOrder.map((item, idx) => {
@@ -274,58 +274,58 @@ function calculateNextDelivery() {
                 </ul>
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-  <input
-    type="text"
-    placeholder="Full Name"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.name}
-    onChange={e => setFormData({ ...formData, name: e.target.value })}
-    required
-  />
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full p-3 border rounded
+                              border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-yellow-500
+                              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                              dark:focus:ring-yellow-400"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="email"
-    placeholder="Email Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.email}
-    onChange={e => setFormData({ ...formData, email: e.target.value })}
-    required
-  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full p-3 border rounded
+                              border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-yellow-500
+                              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                              dark:focus:ring-yellow-400"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="tel"
-    placeholder="Phone Number"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.phone}
-    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-    required
-  />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    className="w-full p-3 border rounded
+                              border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-yellow-500
+                              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                              dark:focus:ring-yellow-400"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="text"
-    placeholder="Delivery Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.address}
-    onChange={e => setFormData({ ...formData, address: e.target.value })}
-    required
-  />
-</div>
+                  <input
+                    type="text"
+                    placeholder="Delivery Address"
+                    className="w-full p-3 border rounded
+                              border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-yellow-500
+                              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                              dark:focus:ring-yellow-400"
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    required
+                  />
+               </div>
 
 <textarea
   placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
