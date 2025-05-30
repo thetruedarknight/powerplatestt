@@ -267,14 +267,26 @@ function calculateNextDelivery() {
                 <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
               </>
             ) : (
-              <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
+              <div className="w-full max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md text-left">
                 <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
                 <ul className="space-y-3 mb-4">
-                  {fullOrder.map((item, idx) => {
-                    const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
-                    return <li key={idx} className="flex justify-between border-b pb-2"><span>{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span><span>${lineTotal.toFixed(2)}</span></li>;
-                  })}
-                </ul>
+  {fullOrder.map((item, idx) => {
+    const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
+    return (
+      <li
+        key={idx}
+        className="flex justify-between border-b pb-2"
+      >
+        <span>
+          {item.name}
+          {item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}
+        </span>
+        <span>${lineTotal.toFixed(2)}</span>
+      </li>
+    );
+  })}
+</ul>
+
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
   <input
