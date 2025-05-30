@@ -167,15 +167,15 @@ function calculateNextDelivery() {
     setShowConfirmation(true);
   };
 
-    const confirmOrder = async () => {
-    // prevent double-click bombs
+  const confirmOrder = async () => {
+    // ← Prevent double‐clicks
     if (isSubmitting) return;
     setIsSubmitting(true);
-
+  
     const { name, email, phone, address, instructions } = formData;
     if (!name || !email || !phone || !address) {
       alert("Please fill out all required customer info.");
-      setIsSubmitting(false);
+      setIsSubmitting(false);    // ← re‐enable on validation fail
       return;
     }
 
@@ -184,54 +184,38 @@ function calculateNextDelivery() {
       hour: "2-digit", minute: "2-digit", hour12: true,
       month: "2-digit", day: "2-digit", year: "numeric",
     });
-    const itemList = fullOrder
-      .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
-      .join("; ");
 
-    // build your payload
-    const payload = {
-      timestamp,
-      name, email, phone, address, instructions,
-      items: itemList,
-      total: calculateTotal().toFixed(2),
-    };
+    const itemList = fullOrder.map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`).join("; ");
+    const deliveryDate = calculateNextDelivery();
+    setExpectedDelivery(deliveryDate.toLocaleDateString("en-US", {
+      weekday: "long", month: "long", day: "numeric",
+    }));
 
     try {
-     // Old: you were doing a fetch("/api/sheets") → computing nextNum yourself…
-     // Now just POST to /api/orders and read back the real ordernumber:
-      const res = await fetch("/api/orders", {
+      const sheetRes = await fetch("/api/sheets");
+      const { orders } = await sheetRes.json();
+      const last = (orders || []).reduce((mx, r) => {
+        const n = parseInt(r.ordernumber, 10);
+        return isNaN(n) ? mx : Math.max(mx, n);
+      }, 1099);
+      const nextNum = last + 1;
+      setOrderNumber(nextNum);
+
+      const payload = { ordernumber: nextNum, timestamp, name, email, phone, address, instructions, items: itemList, total: calculateTotal().toFixed(2) };
+      await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
-      if (!res.ok) {
-        throw new Error("Order submission failed");
-      }
-
-    // pull the server-computed ordernumber from the response
-      const { success, ordernumber } = await res.json();
-      if (!success) {
-        throw new Error("Server rejected the order");
-      }
-
-     // set it in state so the success screen shows the correct ID
-      setOrderNumber(ordernumber);
-     setExpectedDelivery(
-       calculateNextDelivery().toLocaleDateString("en-US", {
-         weekday: "long", month: "long", day: "numeric",
-       })
-     );
-
-      setShowConfirmation(false);
       setShowSuccess(true);
+      setShowConfirmation(false);
     } catch (err) {
       console.error("Submit error:", err);
       alert("There was an error submitting your order.");
       setIsSubmitting(false);
     }
   };
-
 
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
@@ -241,7 +225,7 @@ function calculateNextDelivery() {
   return (
     
     <div className="min-h-screen bg-yellow-50 text-gray-800">
-      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
+      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
       <main>
         {showSuccess ? (
           <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
@@ -274,70 +258,12 @@ function calculateNextDelivery() {
                 </ul>
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-  <input
-    type="text"
-    placeholder="Full Name"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.name}
-    onChange={e => setFormData({ ...formData, name: e.target.value })}
-    required
-  />
-
-  <input
-    type="email"
-    placeholder="Email Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.email}
-    onChange={e => setFormData({ ...formData, email: e.target.value })}
-    required
-  />
-
-  <input
-    type="tel"
-    placeholder="Phone Number"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.phone}
-    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-    required
-  />
-
-  <input
-    type="text"
-    placeholder="Delivery Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.address}
-    onChange={e => setFormData({ ...formData, address: e.target.value })}
-    required
-  />
-</div>
-
-<textarea
-  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
-  rows={3}
-  className="w-full p-3 border rounded mb-6
-             border-gray-300 bg-white text-gray-900 placeholder-gray-500
-             focus:outline-none focus:ring-2 focus:ring-yellow-500
-             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-             dark:focus:ring-yellow-400"
-  value={formData.instructions}
-  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-/>
+                  <input type="text" placeholder="Full Name" className="p-3 border rounded w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                  <input type="email" placeholder="Email Address" className="p-3 border rounded w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
+                  <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
+                  <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
+                </div>
+                <textarea placeholder="Special Instructions - Alllergies, Dietary Restrictions, Additional Requests. Leave blank if none" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button
