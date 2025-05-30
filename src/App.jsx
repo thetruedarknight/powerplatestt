@@ -311,7 +311,17 @@ function App() {
                   required
                 />
             </div>
-
+            <textarea
+                placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+                rows={3}
+                className="w-full p-3 border rounded mb-6
+                          border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                          focus:outline-none focus:ring-2 focus:ring-yellow-500
+                          dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                          dark:focus:ring-yellow-400"
+                value={formData.instructions}
+                onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+              />
             <div className="flex justify-center gap-6 mt-10">
               <button
                 onClick={cancelConfirmation}
