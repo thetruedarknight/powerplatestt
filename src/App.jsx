@@ -264,7 +264,7 @@ function calculateNextDelivery() {
                 <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
               </>
             ) : (
-              <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
+              <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
                 <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
                 <ul className="space-y-3 mb-4">
                   {fullOrder.map((item, idx) => {
@@ -327,28 +327,28 @@ function calculateNextDelivery() {
                   />
                </div>
 
-<textarea
-  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
-  rows={3}
-  className="w-full p-3 border rounded mb-6
-             border-gray-300 bg-white text-gray-900 placeholder-gray-500
-             focus:outline-none focus:ring-2 focus:ring-yellow-500
-             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-             dark:focus:ring-yellow-400"
-  value={formData.instructions}
-  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-/>
+                  <textarea
+                    placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+                    rows={3}
+                    className="w-full p-3 border rounded mb-6
+                              border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-yellow-500
+                              dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                              dark:focus:ring-yellow-400"
+                    value={formData.instructions}
+                    onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+                  />
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button
-  onClick={confirmOrder}
-  disabled={isSubmitting}
-  className={`${
-    isSubmitting ? "opacity-50 cursor-not-allowed " : ""
-  }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
->
-  {isSubmitting ? "Submitting…" : "Confirm Order"}
-</button>
+                    onClick={confirmOrder}
+                    disabled={isSubmitting}
+                    className={`${
+                      isSubmitting ? "opacity-50 cursor-not-allowed " : ""
+                    }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
+                  >
+                    {isSubmitting ? "Submitting…" : "Confirm Order"}
+                  </button>
                 </div>
               </div>
             )}
