@@ -1,13 +1,11 @@
 
 import { useEffect, useState } from "react";
-import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true);
   const [menuData, setMenuData] = useState([]);
   const [doubleMeatPrice, setDoubleMeatPrice] = useState(20);
   const [deliveryDays, setDeliveryDays] = useState(["Tuesday", "Friday"]);
@@ -219,11 +217,8 @@ function calculateNextDelivery() {
 
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
-    if (showLanding) {
-    return <LandingPage onStart={() => setShowLanding(false)} />;
-  }
+
   return (
-    
     <div className="min-h-screen bg-yellow-50 text-gray-800">
       <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
       <main>
@@ -244,8 +239,7 @@ function calculateNextDelivery() {
                 <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
                 <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
                 <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
-                <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
-                <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
+                <button onClick={handleSubmit} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10">Submit Full Order</button>
               </>
             ) : (
               <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
@@ -263,7 +257,7 @@ function calculateNextDelivery() {
                   <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
                   <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
                 </div>
-                <textarea placeholder="Special Instructions - Alllergies, Dietary Restrictions, Additional Requests. Leave blank if none" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
+                <textarea placeholder="Special Instructions (optional)" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button
@@ -281,17 +275,6 @@ function calculateNextDelivery() {
           </div>
         )}
       </main>
-      <a
-  href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
->
-  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
-    <path d="M.057 24l1.687-6.163C.6 15.9.041 13.932.041 12 .041 5.373 5.373.041 12 .041c3.181 0 6.155 1.24 8.409 3.492A11.84 11.84 0 0124 12c0 6.627-5.373 12-12 12a11.937 11.937 0 01-5.208-1.2L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.344 1.591 5.456 0 9.901-4.445 9.901-9.9 0-2.642-1.03-5.127-2.899-6.994C16.132 3.03 13.646 2 11.004 2 5.548 2 1.104 6.445 1.104 12c0 1.77.469 3.462 1.357 4.945l-.896 3.278 3.089-.86zm11.387-5.542c-.2-.1-1.177-.58-1.36-.646-.183-.065-.316-.1-.449.1-.132.2-.515.646-.63.777-.115.132-.232.148-.432.05-.2-.1-.84-.31-1.6-.99-.591-.526-.99-1.175-1.104-1.375-.115-.2-.012-.308.087-.407.09-.09.2-.232.3-.348.1-.116.132-.2.2-.332.066-.132.033-.25-.017-.348-.05-.1-.449-1.075-.615-1.475-.162-.388-.326-.336-.449-.343l-.382-.007c-.116 0-.3.033-.457.25-.157.217-.603.59-.603 1.442s.617 1.675.703 1.79c.083.116 1.21 1.846 2.94 2.588 1.73.743 1.73.495 2.04.464.307-.03 1.004-.408 1.146-.803.14-.396.14-.736.1-.803-.033-.065-.132-.1-.333-.2z" />
-  </svg>
-  Chat with us
-</a>
     </div>
   );
 }
