@@ -216,7 +216,7 @@ function App() {
   return (
     <>
       <style>{debugStyles}</style>
-      <div className="min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-800">
+      <div className="min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-800" style={{margin: 0, padding: 0, boxSizing: "border-box", maxWidth: "100vw", overflowX: "hidden"}}>
         <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
         <main>
           {showSuccess ? (
@@ -240,14 +240,7 @@ function App() {
                   <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
                 </>
               ) : (
-                <div
-                  className="
-                    w-full max-w-2xl mx-auto text-center py-10 px-2 sm:px-6 bg-white rounded-xl shadow-lg 
-                    max-w-full overflow-x-hidden
-                    border-4 border-red-600 bg-gradient-to-br from-white to-yellow-100
-                  "
-                  style={{ boxSizing: 'border-box' }}
-                >
+                <div className="w-full text-center py-10 px-2 bg-white rounded-xl shadow-lg" style={{margin: 0, boxSizing: "border-box"}}>
                   {/* DEBUG: Aggressive overflow/border/break-words */}
                   <h2 className="text-3xl font-bold mb-6">🧾 Confirm Your Order</h2>
                   <ul className="space-y-3 mb-4 text-left break-words w-full border-2 border-blue-400 p-1 overflow-x-auto">
