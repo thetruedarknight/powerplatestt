@@ -215,7 +215,7 @@ function App() {
 
   return (
     <>
-      <style>{debugStyles}</style>
+      
       <div className="min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-800" style={{margin: 0, padding: 0, boxSizing: "border-box", maxWidth: "100vw", overflowX: "hidden"}}>
         <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
         <main>
@@ -240,103 +240,101 @@ function App() {
                   <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
                 </>
               ) : (
-                <div className="w-full text-center py-10 px-2 bg-white rounded-xl shadow-lg" style={{margin: 0, boxSizing: "border-box"}}>
-                  {/* DEBUG: Aggressive overflow/border/break-words */}
-                  <h2 className="text-3xl font-bold mb-6">🧾 Confirm Your Order</h2>
-                  <ul className="space-y-3 mb-4 text-left break-words w-full border-2 border-blue-400 p-1 overflow-x-auto">
-                    {fullOrder.map((item, idx) => {
-                      const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
-                      return (
-                        <li key={idx} className="flex justify-between border-b pb-2 w-full break-all">
-                          <span className="break-words">{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span>
-                          <span>${lineTotal.toFixed(2)}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <div className="w-full text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
-                  <div className="w-full overflow-x-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 w-full border-2 border-green-400">
-                      <input
-                        type="text"
-                        placeholder="Full Name"
-                        className="w-full p-3 border rounded
-                                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
-                                   focus:outline-none focus:ring-2 focus:ring-yellow-500
-                                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-                                   dark:focus:ring-yellow-400"
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        required
-                      />
+                <div className="w-full text-center py-10 px-4 sm:px-6 bg-white rounded-xl shadow-lg">
+  <h2 className="text-3xl font-bold mb-6">🧾 Confirm Your Order</h2>
+  <ul className="space-y-3 mb-4 text-left break-words w-full">
+    {fullOrder.map((item, idx) => {
+      const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
+      return (
+        <li key={idx} className="flex justify-between border-b pb-2 w-full break-all">
+          <span className="break-words">{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span>
+          <span>${lineTotal.toFixed(2)}</span>
+        </li>
+      );
+    })}
+  </ul>
+  <div className="w-full text-right text-xl font-bold mb-6">
+    Total: ${calculateTotal().toFixed(2)}
+  </div>
+  <div className="w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 w-full">
+      <input
+        type="text"
+        placeholder="Full Name"
+        className="w-full p-3 border rounded
+                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-yellow-500
+                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                   dark:focus:ring-yellow-400"
+        value={formData.name}
+        onChange={e => setFormData({ ...formData, name: e.target.value })}
+        required
+      />
+      <input
+        type="email"
+        placeholder="Email Address"
+        className="w-full p-3 border rounded
+                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-yellow-500
+                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                   dark:focus:ring-yellow-400"
+        value={formData.email}
+        onChange={e => setFormData({ ...formData, email: e.target.value })}
+        required
+      />
+      <input
+        type="tel"
+        placeholder="Phone Number"
+        className="w-full p-3 border rounded
+                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-yellow-500
+                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                   dark:focus:ring-yellow-400"
+        value={formData.phone}
+        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Delivery Address"
+        className="w-full p-3 border rounded
+                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-yellow-500
+                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                   dark:focus:ring-yellow-400"
+        value={formData.address}
+        onChange={e => setFormData({ ...formData, address: e.target.value })}
+        required
+      />
+    </div>
+  </div>
+  <textarea
+    placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+    rows={3}
+    className="w-full p-3 border rounded mb-6
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.instructions}
+    onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+  />
+  <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-10">
+    <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded mb-2 sm:mb-0">
+      Edit Order
+    </button>
+    <button
+      onClick={confirmOrder}
+      disabled={isSubmitting}
+      className={`${
+        isSubmitting ? "opacity-50 cursor-not-allowed " : ""
+      }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
+    >
+      {isSubmitting ? "Submitting…" : "Confirm Order"}
+    </button>
+  </div>
+</div>
 
-                      <input
-                        type="email"
-                        placeholder="Email Address"
-                        className="w-full p-3 border rounded
-                                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
-                                   focus:outline-none focus:ring-2 focus:ring-yellow-500
-                                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-                                   dark:focus:ring-yellow-400"
-                        value={formData.email}
-                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-
-                      <input
-                        type="tel"
-                        placeholder="Phone Number"
-                        className="w-full p-3 border rounded
-                                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
-                                   focus:outline-none focus:ring-2 focus:ring-yellow-500
-                                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-                                   dark:focus:ring-yellow-400"
-                        value={formData.phone}
-                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                        required
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Delivery Address"
-                        className="w-full p-3 border rounded
-                                   border-gray-300 bg-white text-gray-900 placeholder-gray-500
-                                   focus:outline-none focus:ring-2 focus:ring-yellow-500
-                                   dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-                                   dark:focus:ring-yellow-400"
-                        value={formData.address}
-                        onChange={e => setFormData({ ...formData, address: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <textarea
-                    placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
-                    rows={3}
-                    className="w-full p-3 border rounded mb-6
-                               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-                               focus:outline-none focus:ring-2 focus:ring-yellow-500
-                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-                               dark:focus:ring-yellow-400"
-                    value={formData.instructions}
-                    onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-                  />
-                  <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-10">
-                    <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded mb-2 sm:mb-0">
-                      Edit Order
-                    </button>
-                    <button
-                      onClick={confirmOrder}
-                      disabled={isSubmitting}
-                      className={`${
-                        isSubmitting ? "opacity-50 cursor-not-allowed " : ""
-                      }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
-                    >
-                      {isSubmitting ? "Submitting…" : "Confirm Order"}
-                    </button>
-                  </div>
-                </div>
               )}
             </div>
           )}
