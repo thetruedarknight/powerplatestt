@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
@@ -31,85 +30,60 @@ function App() {
     instructions: "",
   });
 
+  const WEEKDAYS = [
+    "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
+  ];
 
-
-  // deliveryDays = ["Tuesday","Friday"]
-// cutoffDays   = ["Friday","Tuesday"]
-
-// In App.jsx:
-
-// At the top of App.jsx:
-const WEEKDAYS = [
-  "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
-];
-
-/**  
- * Returns the next occurrence of `weekdayName` on or after `from` (midnight).  
- */
-function getNextWeekday(weekdayName, from = new Date()) {
-  const idx = WEEKDAYS.indexOf(weekdayName);
-  const d = new Date(from);
-  d.setHours(0,0,0,0);
-  const shift = (idx - d.getDay() + 7) % 7;
-  d.setDate(d.getDate() + shift);
-  return d;
-}
-
-/**  
- * Returns the **last** occurrence of `weekdayName` on or before `from` (midnight).  
- */
-function getPrevWeekday(weekdayName, from = new Date()) {
-  const idx = WEEKDAYS.indexOf(weekdayName);
-  const d = new Date(from);
-  d.setHours(0,0,0,0);
-  const back = (d.getDay() - idx + 7) % 7;
-  d.setDate(d.getDate() - back);
-  return d;
-}
-
-function calculateNextDelivery() {
-  const now = new Date();
-  console.log("▶️ Now:", now.toString());
-  const [dayA, dayB] = deliveryDays;  // e.g. ["Tuesday","Friday"]
-  const [dayC, dayD] = cutoffDays;    // e.g. ["Friday","Tuesday"]
-
-  // 1) Try Day A
-  const nextA   = getNextWeekday(dayA, now);
-  const cutoffC = getPrevWeekday(dayC, nextA);
-  cutoffC.setHours(23,59,59,999);
-  console.log(`  Next ${dayA}:`, nextA.toDateString(),
-              `  Cutoff ${dayC}:`, cutoffC.toString());
-  if (now <= cutoffC) {
-    console.log("→ scheduling on A:", nextA.toDateString());
-    return nextA;
+  function getNextWeekday(weekdayName, from = new Date()) {
+    const idx = WEEKDAYS.indexOf(weekdayName);
+    const d = new Date(from);
+    d.setHours(0,0,0,0);
+    const shift = (idx - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + shift);
+    return d;
   }
 
-  // 2) Try Day B
-  const nextB   = getNextWeekday(dayB, now);
-  const cutoffD = getPrevWeekday(dayD, nextB);
-  cutoffD.setHours(23,59,59,999);
-  console.log(`  Next ${dayB}:`, nextB.toDateString(),
-              `  Cutoff ${dayD}:`, cutoffD.toString());
-  if (now <= cutoffD) {
-    console.log("→ scheduling on B:", nextB.toDateString());
-    return nextB;
+  function getPrevWeekday(weekdayName, from = new Date()) {
+    const idx = WEEKDAYS.indexOf(weekdayName);
+    const d = new Date(from);
+    d.setHours(0,0,0,0);
+    const back = (d.getDay() - idx + 7) % 7;
+    d.setDate(d.getDate() - back);
+    return d;
   }
 
-  // 3) Missed both → next A + 1 week
-  const fallback = new Date(nextA);
-  fallback.setDate(fallback.getDate() + 7);
-  console.log("→ missed both, fallback to:", fallback.toDateString());
-  return fallback;
-}
+  function calculateNextDelivery() {
+    const now = new Date();
+    const [dayA, dayB] = deliveryDays;  // e.g. ["Tuesday","Friday"]
+    const [dayC, dayD] = cutoffDays;    // e.g. ["Friday","Tuesday"]
 
+    // 1) Try Day A
+    const nextA   = getNextWeekday(dayA, now);
+    const cutoffC = getPrevWeekday(dayC, nextA);
+    cutoffC.setHours(23,59,59,999);
+    if (now <= cutoffC) {
+      return nextA;
+    }
 
+    // 2) Try Day B
+    const nextB   = getNextWeekday(dayB, now);
+    const cutoffD = getPrevWeekday(dayD, nextB);
+    cutoffD.setHours(23,59,59,999);
+    if (now <= cutoffD) {
+      return nextB;
+    }
+
+    // 3) Missed both → next A + 1 week
+    const fallback = new Date(nextA);
+    fallback.setDate(fallback.getDate() + 7);
+    return fallback;
+  }
 
   useEffect(() => {
     fetch("/api/sheets")
       .then(res => res.json())
       .then(({ menu, config }) => {
         const parsed = (menu || [])
-         // only keep rows with display = TRUE
          .filter(item => String(item.display).toUpperCase() === "TRUE")
          .map(item => ({
           ...item,
@@ -170,8 +144,7 @@ function calculateNextDelivery() {
     setShowConfirmation(true);
   };
 
-    const confirmOrder = async () => {
-    // prevent double-click bombs
+  const confirmOrder = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -191,7 +164,6 @@ function calculateNextDelivery() {
       .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
       .join("; ");
 
-    // build your payload
     const payload = {
       timestamp,
       name, email, phone, address, instructions,
@@ -200,8 +172,6 @@ function calculateNextDelivery() {
     };
 
     try {
-     // Old: you were doing a fetch("/api/sheets") → computing nextNum yourself…
-     // Now just POST to /api/orders and read back the real ordernumber:
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,19 +182,17 @@ function calculateNextDelivery() {
         throw new Error("Order submission failed");
       }
 
-    // pull the server-computed ordernumber from the response
       const { success, ordernumber } = await res.json();
       if (!success) {
         throw new Error("Server rejected the order");
       }
 
-     // set it in state so the success screen shows the correct ID
       setOrderNumber(ordernumber);
-     setExpectedDelivery(
-       calculateNextDelivery().toLocaleDateString("en-US", {
-         weekday: "long", month: "long", day: "numeric",
-       })
-     );
+      setExpectedDelivery(
+        calculateNextDelivery().toLocaleDateString("en-US", {
+          weekday: "long", month: "long", day: "numeric",
+        })
+      );
 
       setShowConfirmation(false);
       setShowSuccess(true);
@@ -235,14 +203,14 @@ function calculateNextDelivery() {
     }
   };
 
-
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
-    if (showLanding) {
+
+  if (showLanding) {
     return <LandingPage onStart={() => setShowLanding(false)} />;
   }
+
   return (
-    
     <div className="min-h-screen bg-yellow-50 text-gray-800">
       <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
       <main>
@@ -267,91 +235,98 @@ function calculateNextDelivery() {
                 <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
               </>
             ) : (
-              <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
-                <h2 className="text-3xl font-bold mb-6 text-center">🧾 Confirm Your Order</h2>
-                <ul className="space-y-3 mb-4">
+              <div className="w-full max-w-2xl mx-auto text-center py-10 px-4 sm:px-6 bg-white rounded-xl shadow-lg">
+                <h2 className="text-3xl font-bold mb-6">🧾 Confirm Your Order</h2>
+                <ul className="space-y-3 mb-4 text-left">
                   {fullOrder.map((item, idx) => {
                     const lineTotal = (item.price + (item.doubleMeat ? doubleMeatPrice : 0)) * item.quantity;
-                    return <li key={idx} className="flex justify-between border-b pb-2"><span>{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span><span>${lineTotal.toFixed(2)}</span></li>;
+                    return (
+                      <li key={idx} className="flex justify-between border-b pb-2">
+                        <span>{item.name}{item.doubleMeat ? " + Double Meat" : ""} × {item.quantity}</span>
+                        <span>${lineTotal.toFixed(2)}</span>
+                      </li>
+                    );
                   })}
                 </ul>
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-  <input
-    type="text"
-    placeholder="Full Name"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.name}
-    onChange={e => setFormData({ ...formData, name: e.target.value })}
-    required
-  />
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full p-3 border rounded
+                               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                               focus:outline-none focus:ring-2 focus:ring-yellow-500
+                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                               dark:focus:ring-yellow-400"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="email"
-    placeholder="Email Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.email}
-    onChange={e => setFormData({ ...formData, email: e.target.value })}
-    required
-  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full p-3 border rounded
+                               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                               focus:outline-none focus:ring-2 focus:ring-yellow-500
+                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                               dark:focus:ring-yellow-400"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="tel"
-    placeholder="Phone Number"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.phone}
-    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-    required
-  />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    className="w-full p-3 border rounded
+                               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                               focus:outline-none focus:ring-2 focus:ring-yellow-500
+                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                               dark:focus:ring-yellow-400"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    required
+                  />
 
-  <input
-    type="text"
-    placeholder="Delivery Address"
-    className="w-full p-3 border rounded
-               border-gray-300 bg-white text-gray-900 placeholder-gray-500
-               focus:outline-none focus:ring-2 focus:ring-yellow-500
-               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-               dark:focus:ring-yellow-400"
-    value={formData.address}
-    onChange={e => setFormData({ ...formData, address: e.target.value })}
-    required
-  />
-</div>
+                  <input
+                    type="text"
+                    placeholder="Delivery Address"
+                    className="w-full p-3 border rounded
+                               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                               focus:outline-none focus:ring-2 focus:ring-yellow-500
+                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                               dark:focus:ring-yellow-400"
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    required
+                  />
+                </div>
 
-<textarea
-  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
-  rows={3}
-  className="w-full p-3 border rounded mb-6
-             border-gray-300 bg-white text-gray-900 placeholder-gray-500
-             focus:outline-none focus:ring-2 focus:ring-yellow-500
-             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
-             dark:focus:ring-yellow-400"
-  value={formData.instructions}
-  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-/>
-                <div className="flex justify-center gap-6 mt-10">
-                  <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
+                <textarea
+                  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+                  rows={3}
+                  className="w-full p-3 border rounded mb-6
+                             border-gray-300 bg-white text-gray-900 placeholder-gray-500
+                             focus:outline-none focus:ring-2 focus:ring-yellow-500
+                             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+                             dark:focus:ring-yellow-400"
+                  value={formData.instructions}
+                  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+                />
+                <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-10">
+                  <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded mb-2 sm:mb-0">
+                    Edit Order
+                  </button>
                   <button
-  onClick={confirmOrder}
-  disabled={isSubmitting}
-  className={`${
-    isSubmitting ? "opacity-50 cursor-not-allowed " : ""
-  }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
->
-  {isSubmitting ? "Submitting…" : "Confirm Order"}
-</button>
+                    onClick={confirmOrder}
+                    disabled={isSubmitting}
+                    className={`${
+                      isSubmitting ? "opacity-50 cursor-not-allowed " : ""
+                    }bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded`}
+                  >
+                    {isSubmitting ? "Submitting…" : "Confirm Order"}
+                  </button>
                 </div>
               </div>
             )}
@@ -359,16 +334,16 @@ function calculateNextDelivery() {
         )}
       </main>
       <a
-  href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
->
-  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
-    <path d="M.057 24l1.687-6.163C.6 15.9.041 13.932.041 12 .041 5.373 5.373.041 12 .041c3.181 0 6.155 1.24 8.409 3.492A11.84 11.84 0 0124 12c0 6.627-5.373 12-12 12a11.937 11.937 0 01-5.208-1.2L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.344 1.591 5.456 0 9.901-4.445 9.901-9.9 0-2.642-1.03-5.127-2.899-6.994C16.132 3.03 13.646 2 11.004 2 5.548 2 1.104 6.445 1.104 12c0 1.77.469 3.462 1.357 4.945l-.896 3.278 3.089-.86zm11.387-5.542c-.2-.1-1.177-.58-1.36-.646-.183-.065-.316-.1-.449.1-.132.2-.515.646-.63.777-.115.132-.232.148-.432.05-.2-.1-.84-.31-1.6-.99-.591-.526-.99-1.175-1.104-1.375-.115-.2-.012-.308.087-.407.09-.09.2-.232.3-.348.1-.116.132-.2.2-.332.066-.132.033-.25-.017-.348-.05-.1-.449-1.075-.615-1.475-.162-.388-.326-.336-.449-.343l-.382-.007c-.116 0-.3.033-.457.25-.157.217-.603.59-.603 1.442s.617 1.675.703 1.79c.083.116 1.21 1.846 2.94 2.588 1.73.743 1.73.495 2.04.464.307-.03 1.004-.408 1.146-.803.14-.396.14-.736.1-.803-.033-.065-.132-.1-.333-.2z" />
-  </svg>
-  Chat with us
-</a>
+        href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
+          <path d="M.057 24l1.687-6.163C.6 15.9.041 13.932.041 12 .041 5.373 5.373.041 12 .041c3.181 0 6.155 1.24 8.409 3.492A11.84 11.84 0 0124 12c0 6.627-5.373 12-12 12a11.937 11.937 0 01-5.208-1.2L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.344 1.591 5.456 0 9.901-4.445 9.901-9.9 0-2.642-1.03-5.127-2.899-6.994C16.132 3.03 13.646 2 11.004 2 5.548 2 1.104 6.445 1.104 12c0 1.77.469 3.462 1.357 4.945l-.896 3.278 3.089-.86zm11.387-5.542c-.2-.1-1.177-.58-1.36-.646-.183-.065-.316-.1-.449.1-.132.2-.515.646-.63.777-.115.132-.232.148-.432.05-.2-.1-.84-.31-1.6-.99-.591-.526-.99-1.175-1.104-1.375-.115-.2-.012-.308.087-.407.09-.09.2-.232.3-.348.1-.116.132-.2.2-.332.066-.132.033-.25-.017-.348-.05-.1-.449-1.075-.615-1.475-.162-.388-.326-.336-.449-.343l-.382-.007c-.116 0-.3.033-.457.25-.157.217-.603.59-.603 1.442s.617 1.675.703 1.79c.083.116 1.21 1.846 2.94 2.588 1.73.743 1.73.495 2.04.464.307-.03 1.004-.408 1.146-.803.14-.396.14-.736.1-.803-.033-.065-.132-.1-.333-.2z" />
+        </svg>
+        Chat with us
+      </a>
     </div>
   );
 }
