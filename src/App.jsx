@@ -1,11 +1,13 @@
 
 import { useEffect, useState } from "react";
+import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [menuData, setMenuData] = useState([]);
   const [doubleMeatPrice, setDoubleMeatPrice] = useState(20);
   const [deliveryDays, setDeliveryDays] = useState(["Tuesday", "Friday"]);
@@ -106,7 +108,10 @@ function calculateNextDelivery() {
     fetch("/api/sheets")
       .then(res => res.json())
       .then(({ menu, config }) => {
-        const parsed = (menu || []).map(item => ({
+        const parsed = (menu || [])
+         // only keep rows with display = TRUE
+         .filter(item => String(item.display).toUpperCase() === "TRUE")
+         .map(item => ({
           ...item,
           price: parseFloat(item.price),
           allowDoubleMeat: String(item.allowDoubleMeat).toUpperCase() === "TRUE",
@@ -165,15 +170,15 @@ function calculateNextDelivery() {
     setShowConfirmation(true);
   };
 
-  const confirmOrder = async () => {
-    // ← Prevent double‐clicks
+    const confirmOrder = async () => {
+    // prevent double-click bombs
     if (isSubmitting) return;
     setIsSubmitting(true);
-  
+
     const { name, email, phone, address, instructions } = formData;
     if (!name || !email || !phone || !address) {
       alert("Please fill out all required customer info.");
-      setIsSubmitting(false);    // ← re‐enable on validation fail
+      setIsSubmitting(false);
       return;
     }
 
@@ -182,32 +187,47 @@ function calculateNextDelivery() {
       hour: "2-digit", minute: "2-digit", hour12: true,
       month: "2-digit", day: "2-digit", year: "numeric",
     });
+    const itemList = fullOrder
+      .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
+      .join("; ");
 
-    const itemList = fullOrder.map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`).join("; ");
-    const deliveryDate = calculateNextDelivery();
-    setExpectedDelivery(deliveryDate.toLocaleDateString("en-US", {
-      weekday: "long", month: "long", day: "numeric",
-    }));
+    // build your payload
+    const payload = {
+      timestamp,
+      name, email, phone, address, instructions,
+      items: itemList,
+      total: calculateTotal().toFixed(2),
+    };
 
     try {
-      const sheetRes = await fetch("/api/sheets");
-      const { orders } = await sheetRes.json();
-      const last = (orders || []).reduce((mx, r) => {
-        const n = parseInt(r.ordernumber, 10);
-        return isNaN(n) ? mx : Math.max(mx, n);
-      }, 1099);
-      const nextNum = last + 1;
-      setOrderNumber(nextNum);
-
-      const payload = { ordernumber: nextNum, timestamp, name, email, phone, address, instructions, items: itemList, total: calculateTotal().toFixed(2) };
-      await fetch("/api/orders", {
+     // Old: you were doing a fetch("/api/sheets") → computing nextNum yourself…
+     // Now just POST to /api/orders and read back the real ordernumber:
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      setShowSuccess(true);
+      if (!res.ok) {
+        throw new Error("Order submission failed");
+      }
+
+    // pull the server-computed ordernumber from the response
+      const { success, ordernumber } = await res.json();
+      if (!success) {
+        throw new Error("Server rejected the order");
+      }
+
+     // set it in state so the success screen shows the correct ID
+      setOrderNumber(ordernumber);
+     setExpectedDelivery(
+       calculateNextDelivery().toLocaleDateString("en-US", {
+         weekday: "long", month: "long", day: "numeric",
+       })
+     );
+
       setShowConfirmation(false);
+      setShowSuccess(true);
     } catch (err) {
       console.error("Submit error:", err);
       alert("There was an error submitting your order.");
@@ -215,12 +235,16 @@ function calculateNextDelivery() {
     }
   };
 
+
   const cancelConfirmation = () => setShowConfirmation(false);
   const getByCategory = cat => menuData.filter(i => i.category === cat);
-
+    if (showLanding) {
+    return <LandingPage onStart={() => setShowLanding(false)} />;
+  }
   return (
+    
     <div className="min-h-screen bg-yellow-50 text-gray-800">
-      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/rpnAoAp.png')" }} />
+      <header className="h-72 bg-cover bg-center" style={{ backgroundImage: "url('https://i.imgur.com/alZ1n3Z.png')" }} />
       <main>
         {showSuccess ? (
           <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
@@ -239,7 +263,8 @@ function calculateNextDelivery() {
                 <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
                 <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
                 <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
-                <button onClick={handleSubmit} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10">Submit Full Order</button>
+                <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
+                <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
               </>
             ) : (
               <div className="max-w-3xl mx-auto py-10 px-4 bg-white rounded-xl shadow-md">
@@ -252,12 +277,70 @@ function calculateNextDelivery() {
                 </ul>
                 <div className="text-right text-xl font-bold mb-6">Total: ${calculateTotal().toFixed(2)}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <input type="text" placeholder="Full Name" className="p-3 border rounded w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
-                  <input type="email" placeholder="Email Address" className="p-3 border rounded w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
-                  <input type="tel" placeholder="Phone Number" className="p-3 border rounded w-full" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} required />
-                  <input type="text" placeholder="Delivery Address" className="p-3 border rounded w-full" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} required />
-                </div>
-                <textarea placeholder="Special Instructions (optional)" className="w-full p-3 border rounded mb-6" rows={3} value={formData.instructions} onChange={e => setFormData({ ...formData, instructions: e.target.value })} />
+  <input
+    type="text"
+    placeholder="Full Name"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.name}
+    onChange={e => setFormData({ ...formData, name: e.target.value })}
+    required
+  />
+
+  <input
+    type="email"
+    placeholder="Email Address"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.email}
+    onChange={e => setFormData({ ...formData, email: e.target.value })}
+    required
+  />
+
+  <input
+    type="tel"
+    placeholder="Phone Number"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.phone}
+    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+    required
+  />
+
+  <input
+    type="text"
+    placeholder="Delivery Address"
+    className="w-full p-3 border rounded
+               border-gray-300 bg-white text-gray-900 placeholder-gray-500
+               focus:outline-none focus:ring-2 focus:ring-yellow-500
+               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+               dark:focus:ring-yellow-400"
+    value={formData.address}
+    onChange={e => setFormData({ ...formData, address: e.target.value })}
+    required
+  />
+</div>
+
+<textarea
+  placeholder="Special Instructions — Allergies, Dietary Restrictions, Additional Requests. Leave blank if none"
+  rows={3}
+  className="w-full p-3 border rounded mb-6
+             border-gray-300 bg-white text-gray-900 placeholder-gray-500
+             focus:outline-none focus:ring-2 focus:ring-yellow-500
+             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400
+             dark:focus:ring-yellow-400"
+  value={formData.instructions}
+  onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+/>
                 <div className="flex justify-center gap-6 mt-10">
                   <button onClick={cancelConfirmation} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">Edit Order</button>
                   <button
@@ -275,6 +358,17 @@ function calculateNextDelivery() {
           </div>
         )}
       </main>
+      <a
+  href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
+    <path d="M.057 24l1.687-6.163C.6 15.9.041 13.932.041 12 .041 5.373 5.373.041 12 .041c3.181 0 6.155 1.24 8.409 3.492A11.84 11.84 0 0124 12c0 6.627-5.373 12-12 12a11.937 11.937 0 01-5.208-1.2L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.344 1.591 5.456 0 9.901-4.445 9.901-9.9 0-2.642-1.03-5.127-2.899-6.994C16.132 3.03 13.646 2 11.004 2 5.548 2 1.104 6.445 1.104 12c0 1.77.469 3.462 1.357 4.945l-.896 3.278 3.089-.86zm11.387-5.542c-.2-.1-1.177-.58-1.36-.646-.183-.065-.316-.1-.449.1-.132.2-.515.646-.63.777-.115.132-.232.148-.432.05-.2-.1-.84-.31-1.6-.99-.591-.526-.99-1.175-1.104-1.375-.115-.2-.012-.308.087-.407.09-.09.2-.232.3-.348.1-.116.132-.2.2-.332.066-.132.033-.25-.017-.348-.05-.1-.449-1.075-.615-1.475-.162-.388-.326-.336-.449-.343l-.382-.007c-.116 0-.3.033-.457.25-.157.217-.603.59-.603 1.442s.617 1.675.703 1.79c.083.116 1.21 1.846 2.94 2.588 1.73.743 1.73.495 2.04.464.307-.03 1.004-.408 1.146-.803.14-.396.14-.736.1-.803-.033-.065-.132-.1-.333-.2z" />
+  </svg>
+  Chat with us
+</a>
     </div>
   );
 }
