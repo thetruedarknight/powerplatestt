@@ -112,7 +112,8 @@ export default async function handler(req, res) {
 
     const mailOptions = {
       from: `"PowerPlates" <${process.env.EMAIL_USER}>`,
-      to: process.env.RECIPIENT_EMAIL,
+      to: payload.email,
+      cc: process.env.RECIPIENT_EMAIL,
       subject: `🍱 PowerPlates Order Received (#${newOrderNumber})`,
       text: `
 New order #${newOrderNumber} at ${timestamp}
