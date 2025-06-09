@@ -225,7 +225,7 @@ function App() {
               <p className="text-lg mb-2">Thank you for placing your order with <strong>PowerPlates</strong>.</p>
               <p className="text-lg text-gray-700 mb-2">Your order number is: <span className="font-semibold">#{orderNumber}</span></p>
               <p className="text-lg font-semibold text-gray-800">Your tentative delivery date is: <span className="text-green-700">{expectedDelivery}</span></p>
-              <p className="text-lg font-semibold text-gray-800">We've emailed you a copy of this order and a member of our team will be in touch with you</p>
+              <p className="text-lg font-semibold text-gray-800">We've emailed you a copy of this order and a member of our team will be in touch with you 😊</p>
               <button onClick={() => window.location.reload()} className="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded">Place Another Order</button>
             </div>
           ) : (
