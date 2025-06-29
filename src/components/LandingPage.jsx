@@ -28,7 +28,7 @@ export default function LandingPage({ onStart }) {
 
         <h2 className="text-3xl font-semibold mb-2">📦 How It Works</h2>
         <p className="mb-4">
-          Choose from our rotating weekly menu. We deliver chilled, ready-to-eat meals twice weekly to most locations within Trinidad. Once you've placed your order, one of our firendly team members will get in touch with you to confirm delivery details.
+          Choose from our rotating weekly menu. We deliver chilled, ready-to-eat meals twice weekly to most locations within Trinidad. Once you've placed your order, one of our friendly team members will get in touch with you to confirm delivery details.
         </p>
         <p className="mb-4">
           Whether you're planning ahead for the week or just need a break from the kitchen, Power Plates has you covered.
