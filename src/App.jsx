@@ -27,6 +27,7 @@ function App() {
   const [snackQty, setSnackQty] = useState([]);
   const [mealQty, setMealQty] = useState([]);
   const [saladQty, setSaladQty] =useState([]);
+  const [proteinQty, setProteinQty] =useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [fullOrder, setFullOrder] = useState([]);
@@ -238,6 +239,7 @@ function App() {
                   <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
                   <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
                   <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
+                  <ProteinSection items={getByCategory("Protein Portions")} quantities={proteinQty} setQuantities={setProteinQty} />
                   <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
                   <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
                 </>
