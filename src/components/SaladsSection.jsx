@@ -1,5 +1,5 @@
 
-export default function MainMealsSection({ items, quantities, setQuantities, doubleMeatPrice }) {
+export default function SaladsSection({ items, quantities, setQuantities, doubleMeatPrice }) {
     const updateQuantity = (index, type, delta) => {
       setQuantities((prev) => {
         const updated = [...prev];
