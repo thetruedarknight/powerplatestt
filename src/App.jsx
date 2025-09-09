@@ -4,7 +4,7 @@ import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
-
+import ProteinSection from "./components/ProteinSection";
 // Global debug styles to squash overflow anywhere
 const debugStyles = `
   html, body, #root {
@@ -105,6 +105,7 @@ function App() {
         setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
         setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
         setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
+        setProteinQty(parsed.filter(i => i.category === "Protein Portions").map(() => 0));
 
         if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
         if (config.deliveryDays)   setDeliveryDays(config.deliveryDays.split(","));
@@ -130,6 +131,7 @@ function App() {
       ...simple(byCat("Protein Snacks"), snackQty),
       ...dual(byCat("Main Meals"), mealQty),
       ...dual(byCat("Salads"), saladQty),
+      ...simple(byCat("Protein Portions"), proteinQty),
     ];
   };
 
