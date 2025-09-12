@@ -163,7 +163,6 @@ function App() {
 
     const timestamp = new Date().toLocaleString("en-US", {
       timeZone: "America/Port_of_Spain",
-      hour: "2-digit", minute: "2-digit", hour12: true,
       month: "2-digit", day: "2-digit", year: "numeric",
     });
     const itemList = fullOrder
