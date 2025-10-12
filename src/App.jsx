@@ -3,7 +3,6 @@ import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
 import MainMealsSection from "./components/MainMealsSection";
-import LeanMealsSection from "./components/LeanMealsSection";
 import SaladsSection from "./components/SaladsSection";
 import ProteinSection from "./components/ProteinSection";
 // Global debug styles to squash overflow anywhere
@@ -27,7 +26,6 @@ function App() {
   const [breakfastQty, setBreakfastQty] = useState([]);
   const [snackQty, setSnackQty] = useState([]);
   const [mealQty, setMealQty] = useState([]);
-  const [leanQty, setLeanQty] = useState([]);
   const [saladQty, setSaladQty] =useState([]);
   const [proteinQty, setProteinQty] =useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -107,7 +105,6 @@ function App() {
         setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => 0));
         setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
         setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
-        setLeanQty(parsed.filter(i => i.category === "Lean Meals").map(() => ({ regular: 0, double: 0 })));
         setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
         setProteinQty(parsed.filter(i => i.category === "Protein Portions").map(() => 0));
 
@@ -134,7 +131,6 @@ function App() {
       ...simple(byCat("Breakfast Items"), breakfastQty),
       ...simple(byCat("Protein Snacks"), snackQty),
       ...dual(byCat("Main Meals"), mealQty),
-      ...dual(byCat("Lean Meals"), leanQty),
       ...dual(byCat("Salads"), saladQty),
       ...simple(byCat("Protein Portions"), proteinQty),
     ];
@@ -241,7 +237,6 @@ function App() {
                   <BreakfastItemsSection items={getByCategory("Breakfast Items")} quantities={breakfastQty} setQuantities={setBreakfastQty} />
                   <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
                   <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
-                  <LeanMealsSection items={getByCategory("Lean Meals")} quantities={leanQty} setQuantities={setLeanQty} doubleMeatPrice={doubleMeatPrice} />
                   <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
                   <ProteinSection items={getByCategory("Protein Portions")} quantities={proteinQty} setQuantities={setProteinQty} />
                   <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
