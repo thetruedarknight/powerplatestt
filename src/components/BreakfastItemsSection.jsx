@@ -6,7 +6,7 @@ export default function BreakfastItemsSection({ items, quantities, setQuantities
     updated[index] = Math.max(0, updated[index] + delta);
     setQuantities(updated);
   };
-
+if (!items || items.length === 0) return null;
   return (
     <section className="py-10 px-4 sm:px-6 bg-white text-gray-800">
       <div className="max-w-7xl mx-auto">
