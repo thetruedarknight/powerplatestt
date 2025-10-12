@@ -106,9 +106,9 @@ function App() {
 
         setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => 0));
         setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
-        setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
         setLeanQty(parsed.filter(i => i.category === "Lean Meals").map(() => ({ regular: 0, double: 0 })));
         setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
+        setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
         setProteinQty(parsed.filter(i => i.category === "Protein Portions").map(() => 0));
 
         if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
@@ -133,9 +133,9 @@ function App() {
     return [
       ...simple(byCat("Breakfast Items"), breakfastQty),
       ...simple(byCat("Protein Snacks"), snackQty),
-      ...dual(byCat("Main Meals"), mealQty),
       ...dual(byCat("Lean Meals"), leanQty),
       ...dual(byCat("Salads"), saladQty),
+      ...dual(byCat("Main Meals"), mealQty),
       ...simple(byCat("Protein Portions"), proteinQty),
     ];
   };
