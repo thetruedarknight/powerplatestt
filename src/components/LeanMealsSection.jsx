@@ -18,7 +18,7 @@ export default function LeanMealsSection({ items, quantities, setQuantities, dou
     return (
       <section className="py-10 px-4 sm:px-6 bg-white text-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">🍛 Lean Meals</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">🧘 Lean Meals</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {items.map((item, index) => (
               <div key={index} className="bg-orange-100 p-5 rounded-xl shadow-sm flex flex-col justify-between">

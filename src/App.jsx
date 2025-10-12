@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import LandingPage from "./components/LandingPage";
 import BreakfastItemsSection from "./components/BreakfastItemsSection";
 import ProteinSnacksSection from "./components/ProteinSnacksSection";
-import MainMealsSection from "./components/MainMealsSection";
 import LeanMealsSection from "./components/LeanMealsSection";
+import MainMealsSection from "./components/MainMealsSection";
 import SaladsSection from "./components/SaladsSection";
 import ProteinSection from "./components/ProteinSection";
 // Global debug styles to squash overflow anywhere
