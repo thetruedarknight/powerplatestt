@@ -12,6 +12,8 @@ export default function MainMealsSection({ items, quantities, setQuantities, dou
     };
   
     const fallbackImage = "https://via.placeholder.com/300x200.png?text=No+Image";
+
+    if (!items || items.length === 0) return null;
   
     return (
       <section className="py-10 px-4 sm:px-6 bg-white text-gray-800">
