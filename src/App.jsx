@@ -26,9 +26,9 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [breakfastQty, setBreakfastQty] = useState([]);
   const [snackQty, setSnackQty] = useState([]);
-  const [mealQty, setMealQty] = useState([]);
   const [leanQty, setLeanQty] = useState([]);
   const [saladQty, setSaladQty] =useState([]);
+  const [mealQty, setMealQty] = useState([]);
   const [proteinQty, setProteinQty] =useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
