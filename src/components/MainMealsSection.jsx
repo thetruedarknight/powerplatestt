@@ -118,7 +118,7 @@ export default function MainMealsSection({
                       <button
                         type="button"
                         onClick={() => toggleInfo(infoKey)}
-                        className="text-sm font-semibold underline underline-offset-4 hover:opacity-80"
+                        className="text-sm font-semibold text-orange-700 underline underline-offset-4 hover:text-orange-800"
                       >
                         {isOpen ? "Hide Info" : "More Info"}
                       </button>
@@ -128,7 +128,7 @@ export default function MainMealsSection({
                           isOpen ? "max-h-96 mt-2 opacity-100" : "max-h-0 opacity-0"
                         }`}
                       >
-                        <div className="bg-white/70 rounded-lg p-3 text-left">
+                        <div className="bg-white rounded-lg p-3 text-left shadow">
                           <ul className="list-disc pl-5 space-y-1 text-sm text-gray-800">
                             {moreInfoLines.map((line, i) => (
                               <li key={i}>{line}</li>
