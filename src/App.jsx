@@ -104,12 +104,12 @@ function App() {
         }));
         setMenuData(parsed);
 
-        setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => 0));
-        setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => 0));
+        setBreakfastQty(parsed.filter(i => i.category === "Breakfast Items").map(() => ({ regular: 0, double: 0 })));
+        setSnackQty(parsed.filter(i => i.category === "Protein Snacks").map(() => ({ regular: 0, double: 0 })));
         setLeanQty(parsed.filter(i => i.category === "Lean Meals").map(() => ({ regular: 0, double: 0 })));
         setSaladQty(parsed.filter(i => i.category === "Salads").map(() => ({ regular: 0, double: 0 })));
         setMealQty(parsed.filter(i => i.category === "Main Meals").map(() => ({ regular: 0, double: 0 })));
-        setProteinQty(parsed.filter(i => i.category === "Protein Portions").map(() => 0));
+        setProteinQty(parsed.filter(i => i.category === "Protein Portions").map(() => ({ regular: 0, double: 0 })));
 
         if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
         if (config.deliveryDays)   setDeliveryDays(config.deliveryDays.split(","));
@@ -131,12 +131,12 @@ function App() {
         return rows;
       });
     return [
-      ...simple(byCat("Breakfast Items"), breakfastQty),
-      ...simple(byCat("Protein Snacks"), snackQty),
+      ...dual(byCat("Breakfast Items"), breakfastQty),
+      ...dual(byCat("Protein Snacks"), snackQty),
       ...dual(byCat("Lean Meals"), leanQty),
       ...dual(byCat("Salads"), saladQty),
       ...dual(byCat("Main Meals"), mealQty),
-      ...simple(byCat("Protein Portions"), proteinQty),
+      ...dual(byCat("Protein Portions"), proteinQty),
     ];
   };
 
