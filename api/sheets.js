@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const auth = new google.auth.JWT({
     email: process.env.GOOGLE_CLIENT_EMAIL,
     // Now that you pasted raw PEM into Vercel, use it directly:
-    key:   process.env.GOOGLE_PRIVATE_KEY,
+    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
   const sheets = google.sheets({ version: "v4", auth });
