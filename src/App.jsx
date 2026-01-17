@@ -33,6 +33,8 @@ function App() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [fullOrder, setFullOrder] = useState([]);
+  const [menuClosed, setMenuClosed] = useState(false);
+
 
   const [formData, setFormData] = useState({
     name: "",
@@ -114,6 +116,10 @@ function App() {
         if (config.doubleMeatPrice) setDoubleMeatPrice(parseFloat(config.doubleMeatPrice));
         if (config.deliveryDays)   setDeliveryDays(config.deliveryDays.split(","));
         if (config.cutoffDays)     setCutoffDays(config.cutoffDays.split(","));
+        if (config.menuClosed !== undefined) {
+            setMenuClosed(String(config.menuClosed).trim().toUpperCase() === "TRUE");
+        }
+
       })
       .catch(console.error);
   }, []);
@@ -237,17 +243,36 @@ function App() {
           ) : (
             <div className="text-center py-10">
               {!showConfirmation ? (
-                <>
-                  <BreakfastItemsSection items={getByCategory("Breakfast Items")} quantities={breakfastQty} setQuantities={setBreakfastQty} />
-                  <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
-                  <LeanMealsSection items={getByCategory("Lean Meals")} quantities={leanQty} setQuantities={setLeanQty} doubleMeatPrice={doubleMeatPrice} />
-                  <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
-                  <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
-                  <ProteinSection items={getByCategory("Protein Portions")} quantities={proteinQty} setQuantities={setProteinQty} />
-                  <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">Submit Full Order</button>
-                  <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline"> ← Back to Home </button>
-                </>
-              ) : (
+  menuClosed ? (
+    <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
+      <h2 className="text-3xl font-bold mb-3">🍽️ We're refreshing the menu</h2>
+      <p className="text-lg text-gray-700">
+        We're refreshing the menu for this coming week. Check us back soon.
+      </p>
+      <button
+        onClick={() => setShowLanding(true)}
+        className="mt-8 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg"
+      >
+        ← Back to Home
+      </button>
+    </div>
+  ) : (
+    <>
+      <BreakfastItemsSection items={getByCategory("Breakfast Items")} quantities={breakfastQty} setQuantities={setBreakfastQty} />
+      <ProteinSnacksSection items={getByCategory("Protein Snacks")} quantities={snackQty} setQuantities={setSnackQty} />
+      <LeanMealsSection items={getByCategory("Lean Meals")} quantities={leanQty} setQuantities={setLeanQty} doubleMeatPrice={doubleMeatPrice} />
+      <SaladsSection items={getByCategory("Salads")} quantities={saladQty} setQuantities={setSaladQty} doubleMeatPrice={doubleMeatPrice} />
+      <MainMealsSection items={getByCategory("Main Meals")} quantities={mealQty} setQuantities={setMealQty} doubleMeatPrice={doubleMeatPrice} />
+      <ProteinSection items={getByCategory("Protein Portions")} quantities={proteinQty} setQuantities={setProteinQty} />
+      <button onClick={handleSubmit} className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">
+        Submit Full Order
+      </button>
+      <button onClick={() => setShowLanding(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg mt-10 hover:underline">
+        ← Back to Home
+      </button>
+    </>
+  )
+) : (
                 <div className="w-full text-center py-10 px-4 sm:px-6 bg-white rounded-xl shadow-lg">
   <h2 className="text-3xl font-bold mb-6">🧾 Confirm Your Order</h2>
   <ul className="space-y-3 mb-4 text-left break-words w-full">
