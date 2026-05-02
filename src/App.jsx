@@ -222,9 +222,36 @@ function App() {
   const getByCategory = cat => menuData.filter(i => i.category === cat);
 
   if (showLanding) {
-  const nextDeliveryDate = calculateNextDelivery().toLocaleDateString("en-US", {
+  const nextDeliveryDateObj = calculateNextDelivery();
+
+  const nextDeliveryDate = nextDeliveryDateObj.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
+    day: "numeric",
+  });
+
+  // Determine which delivery this is (first or second option)
+  const [dayA, dayB] = deliveryDays;
+  const [cutoffA, cutoffB] = cutoffDays;
+
+  const deliveryWeekday = nextDeliveryDateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+
+  let cutoffDayName;
+
+  if (deliveryWeekday === dayA) {
+    cutoffDayName = cutoffA;
+  } else {
+    cutoffDayName = cutoffB;
+  }
+
+  // Get the actual cutoff DATE
+  const cutoffDateObj = getPrevWeekday(cutoffDayName, nextDeliveryDateObj);
+
+  const cutoffDate = cutoffDateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
     day: "numeric",
   });
 
@@ -232,6 +259,7 @@ function App() {
     <LandingPage
       onStart={() => setShowLanding(false)}
       nextDelivery={nextDeliveryDate}
+      cutoffDate={cutoffDate}
     />
   );
 }
