@@ -222,8 +222,19 @@ function App() {
   const getByCategory = cat => menuData.filter(i => i.category === cat);
 
   if (showLanding) {
-    return <LandingPage onStart={() => setShowLanding(false)} />;
-  }
+  const nextDeliveryDate = calculateNextDelivery().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <LandingPage
+      onStart={() => setShowLanding(false)}
+      nextDelivery={nextDeliveryDate}
+    />
+  );
+}
 
   return (
     <>

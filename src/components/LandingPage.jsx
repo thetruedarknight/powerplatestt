@@ -4,7 +4,7 @@ import { Instagram } from "lucide-react";
 // Use the same Imgur banner URL as in App.jsx
 const bannerUrl = "https://i.imgur.com/alZ1n3Z.png";
 
-export default function LandingPage({ onStart }) {
+export default function LandingPage({ onStart, nextDelivery }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-green-100 via-green-200 to-green-300 p-6 text-gray-800">
       {/* Banner from Imgur */}
@@ -52,6 +52,9 @@ export default function LandingPage({ onStart }) {
       >
         Start Your Order
       </button>
+      <p className="text-sm text-gray-700 -mt-2 mb-6">
+          Next delivery: <span className="font-semibold">{nextDelivery}</span>
+      </p>
      <a
   href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
   target="_blank"
