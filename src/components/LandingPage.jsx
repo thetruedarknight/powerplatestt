@@ -53,7 +53,7 @@ export default function LandingPage({ onStart, nextDelivery, cutoffDate }) {
         Start Your Order
       </button>
       <p className="text-sm text-gray-700 -mt-2 mb-6">
-  Orders placed <span className="font-semibold text-red-400 animate-pulse"> before 6 a.m.{" "} {cutoffDate}</span> will get delivered on{" "}
+  Orders placed <span className="font-semibold text-red-600 animate-pulse"> by 6 a.m. on{" "} {cutoffDate}</span> will get delivered on{" "}
   <span className="font-semibold text-blue-700 animate-bounce">{nextDelivery}</span>
 </p>
      <a
