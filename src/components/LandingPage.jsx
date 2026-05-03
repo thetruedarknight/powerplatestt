@@ -53,8 +53,8 @@ export default function LandingPage({ onStart, nextDelivery, cutoffDate }) {
         Start Your Order
       </button>
       <p className="text-sm text-gray-700 -mt-2 mb-6">
-  Orders placed <span className="font-semibold text-red-400"> before{" "} {cutoffDate}</span> will get delivered on{" "}
-  <span className="font-semibold text-blue-700">{nextDelivery}</span>
+  Orders placed <span className="font-semibold text-red-400 animate-pulse"> before 6 a.m.{" "} {cutoffDate}</span> will get delivered on{" "}
+  <span className="font-semibold text-blue-700 animate-bounce">{nextDelivery}</span>
 </p>
      <a
   href="https://wa.me/18683692226?text=Hi%20I'm%20interested%20in%20PowerPlates!"
