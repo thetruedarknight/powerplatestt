@@ -296,7 +296,7 @@ function App() {
   rel="noopener noreferrer"
   className="inline-block mt-5 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded text-lg"
 >
-  View this week’s menu on Instagram
+  View our full menu listing on Instagram
 </a>
       <button
         onClick={() => setShowLanding(true)}
