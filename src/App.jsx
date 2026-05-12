@@ -284,10 +284,20 @@ function App() {
               {!showConfirmation ? (
   menuClosed ? (
     <div className="max-w-2xl mx-auto text-center py-20 px-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold mb-3">🍽️ We're refreshing the menu</h2>
-      <p className="text-lg text-gray-700">
-        We're refreshing the menu for this coming week. Check us back soon.
-      </p>
+      <h2 className="text-3xl font-bold mb-3">🍽️ We're refreshing our menu</h2>
+
+<p className="text-lg text-gray-700">
+  Our online ordering menu is currently closed while it's being refreshed, but you can view our full menu offerings on Instagram. Check us back soon to see this week's options
+</p>
+
+<a
+  href="https://www.instagram.com/p/DYQATzOEQpO/?igsh=MW9veXc3ZnZ4eTlrdQ=="
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-block mt-5 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded text-lg"
+>
+  View this week’s menu on Instagram
+</a>
       <button
         onClick={() => setShowLanding(true)}
         className="mt-8 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded text-lg"
