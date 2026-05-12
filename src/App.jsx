@@ -142,7 +142,7 @@ function App() {
       ...dual(byCat("Lean Meals"), leanQty),
       ...dual(byCat("Salads"), saladQty),
       ...dual(byCat("Main Meals"), mealQty),
-      ...dual(byCat("Protein Portions"), proteinQty),
+      ...dual(byCat("Protein Only Portions"), proteinQty),
     ];
   };
 
