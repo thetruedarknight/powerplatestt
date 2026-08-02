@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     total,
     tentativeDelivery,
   } = payload;
-
+console.log("Order payload received:", payload);
   // 2) Authenticate with Google
   let auth;
   try {
