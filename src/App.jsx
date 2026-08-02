@@ -150,15 +150,31 @@ function App() {
     fullOrder.reduce((sum, it) => sum + (it.price + (it.doubleMeat ? doubleMeatPrice : 0)) * it.quantity, 0);
 
   const handleSubmit = () => {
-    const ord = buildOrder();
-    const totalItems = ord.reduce((acc, i) => acc + i.quantity, 0);
-    if (totalItems < 5) {
-      alert("Please select at least 5 items to place an order.");
-      return;
-    }
-    setFullOrder(ord);
-    setShowConfirmation(true);
-  };
+      const ord = buildOrder();
+
+      const totalItems = ord.reduce(
+        (total, item) => total + item.quantity,
+        0
+      );
+
+      const proteinPortionsOnly =
+        ord.length > 0 &&
+        ord.every(item => item.category === "Protein Portions");
+
+      const minimumItems = proteinPortionsOnly ? 3 : 5;
+
+      if (totalItems < minimumItems) {
+        alert(
+          proteinPortionsOnly
+            ? "Please select at least 3 Protein Portions to place an order."
+            : "Please select at least 5 items to place an order."
+        );
+        return;
+      }
+
+      setFullOrder(ord);
+      setShowConfirmation(true);
+    };
 
   const confirmOrder = async () => {
     if (isSubmitting) return;
