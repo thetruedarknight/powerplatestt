@@ -30,7 +30,6 @@ export default async function handler(req, res) {
     instructions,
     items,
     total,
-    tentativeDelivery
   } = payload;
 
   // 2) Authenticate with Google
@@ -132,8 +131,6 @@ Total: $${total}
 
 Special Instructions:
   ${instructions || "(none)"}
-
-Your tentative delivery date is: ${tentativeDelivery}
       `.trim()
     };
 

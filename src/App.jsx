@@ -164,12 +164,6 @@ function App() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-   const tentativeDelivery = calculateNextDelivery().toLocaleDateString("en-US", {
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-}),
-
     const { name, email, phone, address, instructions } = formData;
     if (!name || !email || !phone || !address) {
       alert("Please fill out all required customer info.");
@@ -190,7 +184,6 @@ function App() {
       name, email, phone, address, instructions,
       items: itemList,
       total: calculateTotal().toFixed(2),
-      tentativeDelivery,
     };
 
     try {
@@ -210,7 +203,11 @@ function App() {
       }
 
       setOrderNumber(ordernumber);
-      setExpectedDelivery(tentativeDelivery);
+      setExpectedDelivery(
+        calculateNextDelivery().toLocaleDateString("en-US", {
+          weekday: "long", month: "long", day: "numeric",
+        })
+      );
 
       setShowConfirmation(false);
       setShowSuccess(true);
