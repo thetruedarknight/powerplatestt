@@ -179,11 +179,18 @@ function App() {
       .map(i => `${i.name}${i.doubleMeat ? " + Double Meat" : ""} x${i.quantity}`)
       .join("; ");
 
+    const tentativeDelivery = calculateNextDelivery().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      });  
+
     const payload = {
       timestamp,
       name, email, phone, address, instructions,
       items: itemList,
       total: calculateTotal().toFixed(2),
+      tentativeDelivery,
     };
 
     try {
@@ -203,11 +210,7 @@ function App() {
       }
 
       setOrderNumber(ordernumber);
-      setExpectedDelivery(
-        calculateNextDelivery().toLocaleDateString("en-US", {
-          weekday: "long", month: "long", day: "numeric",
-        })
-      );
+      setExpectedDelivery(tentativeDelivery);
 
       setShowConfirmation(false);
       setShowSuccess(true);
